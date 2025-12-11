@@ -1,0 +1,485 @@
+{
+  "servers": [
+    {
+      "id": "filesystem",
+      "vendorId": "modelcontextprotocol",
+      "slug": "filesystem",
+      "metadata": {
+        "name": "Filesystem Server",
+        "description": "A Model Context Protocol server providing secure filesystem operations with configurable access controls",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+        "tags": ["filesystem", "files", "storage", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2024-12-01T00:00:00Z",
+          "changelog": "Added support for directory watching and improved error handling",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "/allowed/path"],
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 15420,
+        "stars": 245
+      },
+      "publishedAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-12-01T14:20:00Z",
+      "featured": true,
+      "verified": true
+    },
+    {
+      "id": "github",
+      "vendorId": "modelcontextprotocol",
+      "slug": "github",
+      "metadata": {
+        "name": "GitHub Server",
+        "description": "Interact with GitHub repositories, issues, pull requests, and more through MCP",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+        "tags": ["github", "git", "version-control", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2024-11-28T00:00:00Z",
+          "changelog": "Added support for GitHub Apps authentication",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-github"],
+            "env": {
+              "GITHUB_TOKEN": "your_github_personal_access_token"
+            },
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 12890,
+        "stars": 198
+      },
+      "publishedAt": "2024-01-20T09:15:00Z",
+      "updatedAt": "2024-11-28T16:45:00Z",
+      "featured": true,
+      "verified": true
+    },
+    {
+      "id": "sqlite",
+      "vendorId": "modelcontextprotocol",
+      "slug": "sqlite",
+      "metadata": {
+        "name": "SQLite Server",
+        "description": "Query and interact with SQLite databases through MCP",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+        "tags": ["database", "sqlite", "sql", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2024-11-25T00:00:00Z",
+          "changelog": "Initial release with query and schema inspection capabilities",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-sqlite", "/path/to/database.db"],
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 8750,
+        "stars": 142
+      },
+      "publishedAt": "2024-02-01T11:00:00Z",
+      "updatedAt": "2024-11-25T13:30:00Z",
+      "featured": true,
+      "verified": true
+    },
+    {
+      "id": "brave-search",
+      "vendorId": "modelcontextprotocol",
+      "slug": "brave-search",
+      "metadata": {
+        "name": "Brave Search Server",
+        "description": "Perform web searches using the Brave Search API",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+        "tags": ["search", "web", "brave", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.3.0",
+          "releaseDate": "2024-11-20T00:00:00Z",
+          "changelog": "Added image and news search capabilities",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+            "env": {
+              "BRAVE_API_KEY": "your_brave_api_key"
+            },
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.3.0"
+        }
+      ],
+      "stats": {
+        "downloads": 6340,
+        "stars": 89
+      },
+      "publishedAt": "2024-02-10T14:20:00Z",
+      "updatedAt": "2024-11-20T10:15:00Z",
+      "verified": true
+    },
+    {
+      "id": "postgres",
+      "vendorId": "modelcontextprotocol",
+      "slug": "postgres",
+      "metadata": {
+        "name": "PostgreSQL Server",
+        "description": "Connect to and query PostgreSQL databases through MCP",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+        "tags": ["database", "postgres", "postgresql", "sql", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.4.0",
+          "releaseDate": "2024-11-22T00:00:00Z",
+          "changelog": "Added connection pooling and transaction support",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-postgres"],
+            "env": {
+              "POSTGRES_CONNECTION_STRING": "postgresql://user:pass@localhost:5432/db"
+            },
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 7230,
+        "stars": 124
+      },
+      "publishedAt": "2024-02-05T08:45:00Z",
+      "updatedAt": "2024-11-22T15:10:00Z",
+      "featured": true,
+      "verified": true
+    },
+    {
+      "id": "puppeteer",
+      "vendorId": "modelcontextprotocol",
+      "slug": "puppeteer",
+      "metadata": {
+        "name": "Puppeteer Server",
+        "description": "Browser automation and web scraping using Puppeteer",
+        "homepage": "https://github.com/modelcontextprotocol/servers",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+        "tags": ["browser", "automation", "scraping", "official"],
+        "maintainers": [
+          {
+            "name": "MCP Team",
+            "email": "team@modelcontextprotocol.io"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.3.0",
+          "releaseDate": "2024-11-18T00:00:00Z",
+          "changelog": "Initial release with screenshot and navigation capabilities",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+            "requirements": {
+              "node": ">=18.0.0"
+            }
+          },
+          "mcpVersion": "0.3.0"
+        }
+      ],
+      "stats": {
+        "downloads": 5120,
+        "stars": 76
+      },
+      "publishedAt": "2024-02-15T12:30:00Z",
+      "updatedAt": "2024-11-18T09:20:00Z",
+      "verified": true
+    },
+    {
+      "id": "weather",
+      "vendorId": "community",
+      "slug": "weather",
+      "metadata": {
+        "name": "Weather Server",
+        "description": "Get weather information and forecasts for any location",
+        "homepage": "https://github.com/example/mcp-weather-server",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/example/mcp-weather-server",
+        "tags": ["weather", "api", "forecast"],
+        "maintainers": [
+          {
+            "name": "Community Developer",
+            "email": "dev@example.com"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-11-10T00:00:00Z",
+          "changelog": "First stable release",
+          "runtime": {
+            "type": "node",
+            "command": "npx",
+            "args": ["-y", "mcp-weather-server"],
+            "env": {
+              "WEATHER_API_KEY": "your_weather_api_key"
+            },
+            "requirements": {
+              "node": ">=16.0.0"
+            }
+          },
+          "mcpVersion": "0.3.0"
+        }
+      ],
+      "stats": {
+        "downloads": 2340,
+        "stars": 45
+      },
+      "publishedAt": "2024-03-01T10:00:00Z",
+      "updatedAt": "2024-11-10T14:30:00Z"
+    },
+    {
+      "id": "slack",
+      "vendorId": "community",
+      "slug": "slack",
+      "metadata": {
+        "name": "Slack Server",
+        "description": "Send messages and interact with Slack workspaces",
+        "homepage": "https://github.com/example/mcp-slack-server",
+        "license": "Apache-2.0",
+        "sourceUrl": "https://github.com/example/mcp-slack-server",
+        "tags": ["slack", "communication", "messaging"],
+        "maintainers": [
+          {
+            "name": "Slack Integration Team"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.5.0",
+          "releaseDate": "2024-11-05T00:00:00Z",
+          "changelog": "Added support for file uploads",
+          "runtime": {
+            "type": "python",
+            "command": "python",
+            "args": ["-m", "mcp_slack_server"],
+            "env": {
+              "SLACK_BOT_TOKEN": "xoxb-your-bot-token"
+            },
+            "requirements": {
+              "python": ">=3.9"
+            }
+          },
+          "mcpVersion": "0.3.0"
+        }
+      ],
+      "stats": {
+        "downloads": 1890,
+        "stars": 34
+      },
+      "publishedAt": "2024-03-10T11:15:00Z",
+      "updatedAt": "2024-11-05T16:00:00Z"
+    },
+    {
+      "id": "http-example",
+      "vendorId": "community",
+      "slug": "http-example",
+      "metadata": {
+        "name": "HTTP Example Server",
+        "description": "Example of a remote HTTP-based MCP server",
+        "homepage": "https://example.com/mcp-http",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/example/mcp-http-server",
+        "tags": ["http", "remote", "api"],
+        "maintainers": [
+          {
+            "name": "HTTP Team"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.0.0",
+          "releaseDate": "2024-11-15T00:00:00Z",
+          "changelog": "Initial HTTP server release",
+          "runtime": {
+            "type": "http",
+            "url": "https://mcp-server.example.com/api",
+            "headers": {
+              "Authorization": "Bearer YOUR_API_KEY"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 1250,
+        "stars": 28
+      },
+      "publishedAt": "2024-11-15T10:00:00Z",
+      "updatedAt": "2024-11-15T10:00:00Z"
+    },
+    {
+      "id": "docker-analyzer",
+      "vendorId": "community",
+      "slug": "docker-analyzer",
+      "metadata": {
+        "name": "Docker Container Analyzer",
+        "description": "MCP server running in Docker for analyzing containers and images",
+        "homepage": "https://github.com/example/mcp-docker-analyzer",
+        "license": "Apache-2.0",
+        "sourceUrl": "https://github.com/example/mcp-docker-analyzer",
+        "tags": ["docker", "containers", "analysis"],
+        "maintainers": [
+          {
+            "name": "Docker Team"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "1.2.0",
+          "releaseDate": "2024-11-20T00:00:00Z",
+          "changelog": "Added support for multi-arch containers",
+          "runtime": {
+            "type": "docker",
+            "image": "mcp/docker-analyzer:1.2.0",
+            "ports": {
+              "3000": 3000
+            },
+            "volumes": [
+              "/var/run/docker.sock:/var/run/docker.sock"
+            ],
+            "env": {
+              "DOCKER_HOST": "unix:///var/run/docker.sock"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 3420,
+        "stars": 67
+      },
+      "publishedAt": "2024-09-10T10:00:00Z",
+      "updatedAt": "2024-11-20T14:00:00Z",
+      "verified": true
+    },
+    {
+      "id": "python-data-tools",
+      "vendorId": "community",
+      "slug": "python-data-tools",
+      "metadata": {
+        "name": "Python Data Analysis Tools",
+        "description": "MCP server providing data analysis and visualization capabilities via pip package",
+        "homepage": "https://pypi.org/project/mcp-data-tools/",
+        "license": "MIT",
+        "sourceUrl": "https://github.com/example/mcp-data-tools",
+        "tags": ["python", "data", "analysis", "pip"],
+        "maintainers": [
+          {
+            "name": "Data Team",
+            "email": "data@example.com"
+          }
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.8.5",
+          "releaseDate": "2024-11-25T00:00:00Z",
+          "changelog": "Added pandas 2.0 support and new visualization methods",
+          "runtime": {
+            "type": "pip",
+            "package": "mcp-data-tools",
+            "module": "mcp_data_tools.server",
+            "env": {
+              "DATA_CACHE_DIR": "/tmp/mcp-cache"
+            },
+            "requirements": {
+              "python": ">=3.9"
+            }
+          },
+          "mcpVersion": "0.4.0"
+        }
+      ],
+      "stats": {
+        "downloads": 5680,
+        "stars": 92
+      },
+      "publishedAt": "2024-08-15T10:00:00Z",
+      "updatedAt": "2024-11-25T09:00:00Z"
+    }
+  ]
+}
