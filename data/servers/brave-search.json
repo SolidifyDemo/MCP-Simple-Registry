@@ -1,0 +1,53 @@
+{
+  "id": "brave-search",
+  "vendorId": "modelcontextprotocol",
+  "slug": "brave-search",
+  "metadata": {
+    "name": "Brave Search Server",
+    "description": "Perform web searches using the Brave Search API",
+    "homepage": "https://github.com/modelcontextprotocol/servers",
+    "license": "MIT",
+    "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+    "tags": [
+      "search",
+      "web",
+      "brave",
+      "official"
+    ],
+    "maintainers": [
+      {
+        "name": "MCP Team",
+        "email": "team@modelcontextprotocol.io"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "0.3.0",
+      "releaseDate": "2024-11-20T00:00:00Z",
+      "changelog": "Added image and news search capabilities",
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-brave-search"
+        ],
+        "env": {
+          "BRAVE_API_KEY": "your_brave_api_key"
+        },
+        "requirements": {
+          "node": ">=18.0.0"
+        }
+      },
+      "mcpVersion": "0.3.0"
+    }
+  ],
+  "stats": {
+    "downloads": 6340,
+    "stars": 89
+  },
+  "publishedAt": "2024-02-10T14:20:00Z",
+  "updatedAt": "2024-11-20T10:15:00Z",
+  "verified": true
+}

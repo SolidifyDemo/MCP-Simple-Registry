@@ -1,0 +1,55 @@
+{
+  "id": "postgres",
+  "vendorId": "modelcontextprotocol",
+  "slug": "postgres",
+  "metadata": {
+    "name": "PostgreSQL Server",
+    "description": "Connect to and query PostgreSQL databases through MCP",
+    "homepage": "https://github.com/modelcontextprotocol/servers",
+    "license": "MIT",
+    "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+    "tags": [
+      "database",
+      "postgres",
+      "postgresql",
+      "sql",
+      "official"
+    ],
+    "maintainers": [
+      {
+        "name": "MCP Team",
+        "email": "team@modelcontextprotocol.io"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "0.4.0",
+      "releaseDate": "2024-11-22T00:00:00Z",
+      "changelog": "Added connection pooling and transaction support",
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-postgres"
+        ],
+        "env": {
+          "POSTGRES_CONNECTION_STRING": "postgresql://user:pass@localhost:5432/db"
+        },
+        "requirements": {
+          "node": ">=18.0.0"
+        }
+      },
+      "mcpVersion": "0.4.0"
+    }
+  ],
+  "stats": {
+    "downloads": 7230,
+    "stars": 124
+  },
+  "publishedAt": "2024-02-05T08:45:00Z",
+  "updatedAt": "2024-11-22T15:10:00Z",
+  "featured": true,
+  "verified": true
+}

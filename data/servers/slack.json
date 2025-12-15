@@ -1,0 +1,50 @@
+{
+  "id": "slack",
+  "vendorId": "community",
+  "slug": "slack",
+  "metadata": {
+    "name": "Slack Server",
+    "description": "Send messages and interact with Slack workspaces",
+    "homepage": "https://github.com/example/mcp-slack-server",
+    "license": "Apache-2.0",
+    "sourceUrl": "https://github.com/example/mcp-slack-server",
+    "tags": [
+      "slack",
+      "communication",
+      "messaging"
+    ],
+    "maintainers": [
+      {
+        "name": "Slack Integration Team"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "0.5.0",
+      "releaseDate": "2024-11-05T00:00:00Z",
+      "changelog": "Added support for file uploads",
+      "runtime": {
+        "type": "python",
+        "command": "python",
+        "args": [
+          "-m",
+          "mcp_slack_server"
+        ],
+        "env": {
+          "SLACK_BOT_TOKEN": "xoxb-your-bot-token"
+        },
+        "requirements": {
+          "python": ">=3.9"
+        }
+      },
+      "mcpVersion": "0.3.0"
+    }
+  ],
+  "stats": {
+    "downloads": 1890,
+    "stars": 34
+  },
+  "publishedAt": "2024-03-10T11:15:00Z",
+  "updatedAt": "2024-11-05T16:00:00Z"
+}

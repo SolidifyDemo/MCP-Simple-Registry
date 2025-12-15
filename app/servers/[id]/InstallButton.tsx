@@ -8,7 +8,7 @@ interface InstallButtonProps {
 }
 
 export default function InstallButton({ slug, version }: InstallButtonProps) {
-  let config: any;
+  let config: Record<string, unknown>;
   
   switch (version.runtime.type) {
     case 'http':

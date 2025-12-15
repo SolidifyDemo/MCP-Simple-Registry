@@ -1,0 +1,52 @@
+{
+  "id": "sqlite",
+  "vendorId": "modelcontextprotocol",
+  "slug": "sqlite",
+  "metadata": {
+    "name": "SQLite Server",
+    "description": "Query and interact with SQLite databases through MCP",
+    "homepage": "https://github.com/modelcontextprotocol/servers",
+    "license": "MIT",
+    "sourceUrl": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+    "tags": [
+      "database",
+      "sqlite",
+      "sql",
+      "official"
+    ],
+    "maintainers": [
+      {
+        "name": "MCP Team",
+        "email": "team@modelcontextprotocol.io"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "0.4.0",
+      "releaseDate": "2024-11-25T00:00:00Z",
+      "changelog": "Initial release with query and schema inspection capabilities",
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-sqlite",
+          "/path/to/database.db"
+        ],
+        "requirements": {
+          "node": ">=18.0.0"
+        }
+      },
+      "mcpVersion": "0.4.0"
+    }
+  ],
+  "stats": {
+    "downloads": 8750,
+    "stars": 142
+  },
+  "publishedAt": "2024-02-01T11:00:00Z",
+  "updatedAt": "2024-11-25T13:30:00Z",
+  "featured": true,
+  "verified": true
+}

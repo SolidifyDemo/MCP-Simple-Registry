@@ -1,0 +1,51 @@
+{
+  "id": "weather",
+  "vendorId": "community",
+  "slug": "weather",
+  "metadata": {
+    "name": "Weather Server",
+    "description": "Get weather information and forecasts for any location",
+    "homepage": "https://github.com/example/mcp-weather-server",
+    "license": "MIT",
+    "sourceUrl": "https://github.com/example/mcp-weather-server",
+    "tags": [
+      "weather",
+      "api",
+      "forecast"
+    ],
+    "maintainers": [
+      {
+        "name": "Community Developer",
+        "email": "dev@example.com"
+      }
+    ]
+  },
+  "versions": [
+    {
+      "version": "1.0.0",
+      "releaseDate": "2024-11-10T00:00:00Z",
+      "changelog": "First stable release",
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "mcp-weather-server"
+        ],
+        "env": {
+          "WEATHER_API_KEY": "your_weather_api_key"
+        },
+        "requirements": {
+          "node": ">=16.0.0"
+        }
+      },
+      "mcpVersion": "0.3.0"
+    }
+  ],
+  "stats": {
+    "downloads": 2340,
+    "stars": 45
+  },
+  "publishedAt": "2024-03-01T10:00:00Z",
+  "updatedAt": "2024-11-10T14:30:00Z"
+}

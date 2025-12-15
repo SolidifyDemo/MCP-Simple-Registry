@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
       verified: searchParams.get('verified') === 'true' ? true : undefined,
       page: parseInt(searchParams.get('page') || '1'),
       pageSize: parseInt(searchParams.get('pageSize') || '20'),
-      sortBy: (searchParams.get('sortBy') as any) || 'updatedAt',
-      sortOrder: (searchParams.get('sortOrder') as any) || 'desc'
+      sortBy: (searchParams.get('sortBy') as 'name' | 'downloads' | 'stars' | 'publishedAt' | 'updatedAt') || 'updatedAt',
+      sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc'
     };
 
     const result = await searchServers(filter);

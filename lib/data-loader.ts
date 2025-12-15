@@ -5,7 +5,7 @@ import { Server } from './types';
 let cachedServers: Server[] | null = null;
 
 /**
- * Load servers from JSON file
+ * Load servers from individual JSON files in data/servers/ directory
  * Results are cached for performance
  */
 export async function loadServers(): Promise<Server[]> {
@@ -14,11 +14,21 @@ export async function loadServers(): Promise<Server[]> {
   }
 
   try {
-    const dataPath = path.join(process.cwd(), 'data', 'servers.json');
-    const fileContent = await fs.readFile(dataPath, 'utf-8');
-    const data = JSON.parse(fileContent);
+    const serversDir = path.join(process.cwd(), 'data', 'servers');
     
-    const servers = data.servers || [];
+    // Read all JSON files from the servers directory
+    const files = await fs.readdir(serversDir);
+    const jsonFiles = files.filter(file => file.endsWith('.json'));
+    
+    // Load each server file
+    const servers: Server[] = [];
+    for (const file of jsonFiles) {
+      const filePath = path.join(serversDir, file);
+      const fileContent = await fs.readFile(filePath, 'utf-8');
+      const server = JSON.parse(fileContent);
+      servers.push(server);
+    }
+    
     cachedServers = servers;
     return servers;
   } catch (error) {
@@ -108,8 +118,8 @@ export async function searchServers(filter: ServerFilter = {}): Promise<Paginate
   const sortOrder = filter.sortOrder || 'desc';
   
   servers.sort((a, b) => {
-    let aVal: any;
-    let bVal: any;
+    let aVal: string | number;
+    let bVal: string | number;
 
     switch (sortBy) {
       case 'name':
