@@ -4,8 +4,16 @@ This registry **fully complies** with the official Model Context Protocol (MCP) 
 
 ## Base URL
 
+The API is available at both v0 and v0.1 paths for compatibility:
+
 ```
-http://localhost:3000/api/v0
+http://localhost:3000/api/v0.1  (recommended - official spec)
+http://localhost:3000/api/v0    (also supported)
+```
+
+For production:
+```
+https://mcp-simple-registry.vercel.app/api/v0.1
 ```
 
 ## Compliance Status
