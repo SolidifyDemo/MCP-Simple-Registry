@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchServers, ServerFilter } from '@/lib/data-loader';
+import { searchServers, getServersInMCPFormat, ServerFilter } from '@/lib/data-loader';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
+
+    // Check if client wants MCP format (default) or legacy format
+    const format = searchParams.get('format') || 'mcp';
 
     // Build filter from query parameters
     const filter: ServerFilter = {
@@ -18,8 +21,14 @@ export async function GET(request: NextRequest) {
       sortOrder: (searchParams.get('sortOrder') as 'asc' | 'desc') || 'desc'
     };
 
-    const result = await searchServers(filter);
+    // Return MCP format by default (for compatibility with MCP clients)
+    if (format === 'mcp') {
+      const result = await getServersInMCPFormat(filter);
+      return NextResponse.json(result);
+    }
 
+    // Legacy format for backwards compatibility
+    const result = await searchServers(filter);
     return NextResponse.json({
       servers: result.servers,
       pagination: result.pagination

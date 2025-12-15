@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Server } from './types';
+import { Server, MCPServerEntry, MCPServerSchema, MCPServersResponse } from './types';
 
 let cachedServers: Server[] | null = null;
 
@@ -229,3 +229,138 @@ export async function getRegistryStats() {
     tags: (await getAllTags()).length
   };
 }
+
+/**
+ * Transform internal Server format to MCP registry format
+ * Each version of a server becomes a separate MCPServerEntry
+ */
+export function transformToMCPFormat(server: Server): MCPServerEntry[] {
+  const entries: MCPServerEntry[] = [];
+  
+  // Sort versions to determine the latest
+  const sortedVersions = [...server.versions].sort((a, b) => {
+    const dateA = new Date(a.releaseDate).getTime();
+    const dateB = new Date(b.releaseDate).getTime();
+    return dateB - dateA;
+  });
+
+  sortedVersions.forEach((version, index) => {
+    const isLatest = index === 0;
+
+    // Build the MCP server schema
+    const mcpSchema: MCPServerSchema = {
+      $schema: 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json',
+      name: `${server.vendorId}/${server.slug}`,
+      description: server.metadata.description,
+      version: version.version,
+      repository: server.metadata.sourceUrl ? {
+        url: server.metadata.sourceUrl,
+        source: 'github' // Default to github, can be inferred from URL
+      } : {},
+      _meta: {}
+    };
+
+    // Add optional fields
+    if (server.metadata.name !== `${server.vendorId}/${server.slug}`) {
+      mcpSchema.title = server.metadata.name;
+    }
+
+    if (server.metadata.homepage) {
+      mcpSchema.websiteUrl = server.metadata.homepage;
+    }
+
+    if (server.metadata.logoUrl) {
+      mcpSchema.icons = [{
+        src: server.metadata.logoUrl
+      }];
+    }
+
+    // Transform runtime info to remotes or packages based on type
+    if (version.runtime.type === 'http') {
+      mcpSchema.remotes = [{
+        type: 'streamable-http',
+        url: version.runtime.url
+      }];
+    } else if (version.runtime.type === 'pip' && 'package' in version.runtime) {
+      mcpSchema.packages = [{
+        registryType: 'pypi',
+        registryBaseUrl: 'https://pypi.org',
+        identifier: version.runtime.package,
+        version: version.version,
+        transport: {
+          type: 'stdio'
+        }
+      }];
+    } else if (version.runtime.type === 'node' || version.runtime.type === 'binary') {
+      // For node/binary, we could add packages if it's an npm package
+      // For now, leaving it without remotes/packages
+    }
+
+    // Create the entry with metadata
+    const entry: MCPServerEntry = {
+      server: mcpSchema,
+      _meta: {
+        'io.modelcontextprotocol.registry/official': {
+          status: version.deprecated ? 'deprecated' : 'active',
+          publishedAt: version.releaseDate,
+          updatedAt: server.updatedAt,
+          isLatest
+        }
+      }
+    };
+
+    entries.push(entry);
+  });
+
+  return entries;
+}
+
+/**
+ * Get servers in MCP registry format
+ */
+export async function getServersInMCPFormat(filter: ServerFilter = {}): Promise<MCPServersResponse> {
+  const { servers } = await searchServers(filter);
+  
+  // Transform each server to MCP format (creates multiple entries for versions)
+  const allEntries: MCPServerEntry[] = [];
+  servers.forEach(server => {
+    const entries = transformToMCPFormat(server);
+    allEntries.push(...entries);
+  });
+
+  // Calculate cursor for pagination (using last entry's name:version)
+  let nextCursor: string | undefined;
+  if (allEntries.length > 0) {
+    const lastEntry = allEntries[allEntries.length - 1];
+    nextCursor = `${lastEntry.server.name}:${lastEntry.server.version}`;
+  }
+
+  return {
+    servers: allEntries,
+    metadata: {
+      nextCursor,
+      count: allEntries.length
+    }
+  };
+}
+
+/**
+ * Get a single server by ID in MCP registry format
+ * Returns all versions of the server
+ */
+export async function getServerByIdInMCPFormat(id: string): Promise<MCPServersResponse | null> {
+  const server = await getServerById(id);
+  if (!server) {
+    return null;
+  }
+
+  const entries = transformToMCPFormat(server);
+
+  return {
+    servers: entries,
+    metadata: {
+      count: entries.length
+    }
+  };
+}
+

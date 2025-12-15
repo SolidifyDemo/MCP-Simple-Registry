@@ -1,5 +1,37 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+# MCP Registry
+
+A Model Context Protocol (MCP) server registry that provides both a web interface and an API compatible with the [official MCP registry specification](https://registry.modelcontextprotocol.io/docs).
+
+## Features
+
+- 🔍 **Web Interface** - Browse and search MCP servers through a user-friendly UI
+- 🔌 **API Endpoints** - RESTful API compatible with official MCP registry clients
+- 📦 **Dual Format Support** - Returns data in both MCP format (default) and legacy format
+- 🏷️ **Filtering & Search** - Filter by tags, vendors, search queries, and more
+- ⭐ **Featured & Verified** - Highlight trusted and popular servers
+
+## API Documentation
+
+See [API.md](./API.md) for complete API documentation.
+
+### Quick API Examples
+
+```bash
+# List all servers (MCP format)
+curl http://localhost:3000/api/v0/servers
+
+# Search for servers
+curl http://localhost:3000/api/v0/servers?q=github
+
+# Get specific server
+curl http://localhost:3000/api/v0/servers/github
+
+# Health check
+curl http://localhost:3000/api/v0/health
+```
+
 ## Getting Started
 
 First, run the development server:
