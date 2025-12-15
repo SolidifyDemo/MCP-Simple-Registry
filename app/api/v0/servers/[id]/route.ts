@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerById, getServerByIdInMCPFormat } from '@/lib/data-loader';
+import { addCorsHeaders, corsHeaders } from '@/lib/cors';
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
 
 export async function GET(
   request: NextRequest,
@@ -16,42 +21,42 @@ export async function GET(
       const result = await getServerByIdInMCPFormat(id);
 
       if (!result) {
-        return NextResponse.json(
+        return addCorsHeaders(NextResponse.json(
           {
             error: 'Not Found',
             message: `Server with id '${id}' not found`
           },
           { status: 404 }
-        );
+        ));
       }
 
-      return NextResponse.json(result);
+      return addCorsHeaders(NextResponse.json(result));
     }
 
     // Legacy format
     const server = await getServerById(id);
 
     if (!server) {
-      return NextResponse.json(
+      return addCorsHeaders(NextResponse.json(
         {
           error: 'Not Found',
           message: `Server with id '${id}' not found`
         },
         { status: 404 }
-      );
+      ));
     }
 
-    return NextResponse.json({
+    return addCorsHeaders(NextResponse.json({
       server
-    });
+    }));
   } catch (error) {
     console.error('Error fetching server:', error);
-    return NextResponse.json(
+    return addCorsHeaders(NextResponse.json(
       {
         error: 'Internal Server Error',
         message: 'Failed to fetch server'
       },
       { status: 500 }
-    );
+    ));
   }
 }

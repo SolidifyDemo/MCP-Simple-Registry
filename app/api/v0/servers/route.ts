@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchServers, getServersInMCPFormat, ServerFilter } from '@/lib/data-loader';
+import { addCorsHeaders, corsHeaders } from '@/lib/cors';
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: corsHeaders });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,23 +29,23 @@ export async function GET(request: NextRequest) {
     // Return MCP format by default (for compatibility with MCP clients)
     if (format === 'mcp') {
       const result = await getServersInMCPFormat(filter);
-      return NextResponse.json(result);
+      return addCorsHeaders(NextResponse.json(result));
     }
 
     // Legacy format for backwards compatibility
     const result = await searchServers(filter);
-    return NextResponse.json({
+    return addCorsHeaders(NextResponse.json({
       servers: result.servers,
       pagination: result.pagination
-    });
+    }));
   } catch (error) {
     console.error('Error fetching servers:', error);
-    return NextResponse.json(
+    return addCorsHeaders(NextResponse.json(
       {
         error: 'Internal Server Error',
         message: 'Failed to fetch servers'
       },
       { status: 500 }
-    );
+    ));
   }
 }

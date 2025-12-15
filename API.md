@@ -1,6 +1,6 @@
 # MCP Registry API Documentation
 
-This registry is compatible with the official Model Context Protocol (MCP) registry specification at https://registry.modelcontextprotocol.io/docs
+This registry **fully complies** with the official Model Context Protocol (MCP) registry specification v0.1 at https://registry.modelcontextprotocol.io/docs
 
 ## Base URL
 
@@ -8,7 +8,96 @@ This registry is compatible with the official Model Context Protocol (MCP) regis
 http://localhost:3000/api/v0
 ```
 
+## Compliance Status
+
+✅ **All required endpoints implemented**
+✅ **CORS headers enabled on all endpoints**
+✅ **MCP server schema compliance**
+✅ **Proper error handling**
+
 ## Endpoints
+
+### Ping (Liveness Check)
+
+**GET** `/ping`
+
+Simple liveness check endpoint to verify the registry is running.
+
+#### Response
+
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-12-15T10:30:00Z"
+}
+```
+
+#### Example
+
+```bash
+curl http://localhost:3000/api/v0/ping
+```
+
+---
+
+### Version Information
+
+**GET** `/version`
+
+Returns version information about the registry API.
+
+#### Response
+
+```json
+{
+  "version": "0.1.0",
+  "apiVersion": "v0",
+  "specification": "https://registry.modelcontextprotocol.io/docs",
+  "timestamp": "2024-12-15T10:30:00Z"
+}
+```
+
+#### Example
+
+```bash
+curl http://localhost:3000/api/v0/version
+```
+
+---
+
+### Health Check
+
+**GET** `/health`
+
+Returns the health status of the registry with detailed checks.
+
+#### Response
+
+```json
+{
+  "status": "ok",
+  "version": "1.0.0",
+  "timestamp": "2024-12-15T10:30:00Z",
+  "checks": {
+    "dataSource": "ok"
+  },
+  "stats": {
+    "totalServers": 11,
+    "totalDownloads": 125000,
+    "totalStars": 2500,
+    "featuredServers": 5,
+    "verifiedServers": 8
+  }
+}
+```
+
+#### Example
+
+```bash
+curl http://localhost:3000/api/v0/health
+```
+
+---
 
 ### List Servers
 
@@ -182,31 +271,22 @@ curl http://localhost:3000/api/v0/servers/github
 curl http://localhost:3000/api/v0/servers/github?format=legacy
 ```
 
-### Health Check
+---
 
-**GET** `/health`
+## CORS Support
 
-Returns the health status of the registry.
+All API endpoints include proper CORS headers for cross-origin requests:
 
-#### Response
-
-```json
-{
-  "status": "ok",
-  "version": "1.0.0",
-  "timestamp": "2024-12-15T10:30:00Z",
-  "checks": {
-    "dataSource": "ok"
-  },
-  "stats": {
-    "totalServers": 11,
-    "totalDownloads": 125000,
-    "totalStars": 2500,
-    "featuredServers": 5,
-    "verifiedServers": 8
-  }
-}
 ```
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Max-Age: 86400
+```
+
+All endpoints support `OPTIONS` requests for CORS preflight checks.
+
+---
 
 ## MCP Server Schema
 
