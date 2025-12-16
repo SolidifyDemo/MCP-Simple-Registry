@@ -38,7 +38,16 @@ export interface Package {
   transport?: {
     type: 'stdio' | 'http' | 'sse';
   };
-  [key: string]: unknown; // Allow additional properties like environmentVariables
+  environmentVariables?: EnvironmentVariable[];
+  [key: string]: unknown; // Allow additional properties
+}
+
+export interface EnvironmentVariable {
+  name: string;
+  description: string;
+  isSecret: boolean;
+  format?: string;
+  default?: string;
 }
 
 export interface MCPServerEntry {
@@ -94,14 +103,18 @@ export type RuntimeInfo =
       type: 'node' | 'binary';
       command: string;
       args?: string[];
+      additionalArgs?: RuntimeArgument[];
       env?: Record<string, string>;
+      environmentVariables?: EnvironmentVariable[];
       requirements?: Requirements;
     }
   | {
       type: 'python';
       command: string;
       args?: string[];
+      additionalArgs?: RuntimeArgument[];
       env?: Record<string, string>;
+      environmentVariables?: EnvironmentVariable[];
       requirements?: Requirements;
     }
   | {
@@ -109,6 +122,7 @@ export type RuntimeInfo =
       package: string;
       module: string;
       env?: Record<string, string>;
+      environmentVariables?: EnvironmentVariable[];
       requirements?: Requirements;
     }
   | {
@@ -117,13 +131,27 @@ export type RuntimeInfo =
       ports?: Record<string, number>;
       volumes?: string[];
       env?: Record<string, string>;
+      environmentVariables?: EnvironmentVariable[];
       requirements?: Requirements;
     }
   | {
       type: 'http';
       url: string;
-      headers?: Record<string, string>;
+      headers?: RuntimeHeader[];
+      environmentVariables?: EnvironmentVariable[];
     };
+
+export interface RuntimeArgument {
+  value: string;
+  description?: string;
+  isSecret: boolean;
+}
+
+export interface RuntimeHeader {
+  name: string;
+  description: string;
+  isSecret: boolean;
+}
 
 export interface Requirements {
   node?: string;

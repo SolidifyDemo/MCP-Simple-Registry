@@ -67,6 +67,21 @@ body:
       description: For Node.js runtime - full package name (e.g., @org/package)
       placeholder: "e.g., @modelcontextprotocol/server-brave-search"
 
+  - type: textarea
+    id: npm-args
+    attributes:
+      label: Additional NPM Arguments (Optional)
+      description: |
+        For Node.js runtime - additional arguments to pass after the package name.
+        Format: VALUE|description|secret (where secret is true/false)
+        Examples:
+        - myorg|Organization name|false
+        - myproject|Project identifier|false
+        - --token=TOKEN|Authentication token|true
+      placeholder: |
+        myorg|Organization name|false
+        myproject|Project name|false
+
   - type: input
     id: docker-image
     attributes:
@@ -82,15 +97,36 @@ body:
       placeholder: "e.g., https://api.example.com/mcp"
 
   - type: textarea
+    id: http-headers
+    attributes:
+      label: HTTP Headers (Optional)
+      description: |
+        For HTTP runtime - custom headers to send with requests.
+        Format: NAME|description|secret (where secret is true/false)
+        Examples:
+        - Authorization|Bearer token for authentication|true
+        - X-API-Version|API version to use|false
+        - X-Client-ID|Client identifier|false
+      placeholder: |
+        Authorization|Bearer token for API authentication|true
+        X-API-Version|API version (e.g., v2)|false
+        X-Client-ID|Your client ID|false
+
+  - type: textarea
     id: env-vars
     attributes:
       label: Environment Variables (Optional)
       description: |
-        Required environment variables, one per line in KEY=value format.
-        Use ${input:var_name} for user input, ${secret:var_name} for secrets.
+        Required environment variables, one per line.
+        Format: NAME|description|secret (where secret is true/false)
+        Examples:
+        - API_KEY|Your API key for authentication|true
+        - DATABASE_NAME|Name of the database to connect to|false
+        - REGION|AWS region|false
       placeholder: |
-        API_KEY=${input:api_key}
-        SECRET_TOKEN=${secret:token}
+        API_KEY|API key for authentication|true
+        DATABASE_NAME|Database name|false
+        GITHUB_TOKEN|GitHub personal access token|true
 
   - type: textarea
     id: description-override

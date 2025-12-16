@@ -31,11 +31,76 @@ The easiest way to contribute a new server is through our GitHub issue form:
 
 ### Optional Fields
 
+- **NPM Arguments**: Additional arguments for npm packages
 - **Environment Variables**: Required env vars (KEY=value format)
+- **HTTP Headers**: Custom headers for HTTP servers
 - **Custom Description**: Override auto-fetched description
 - **Custom Homepage**: Override auto-fetched homepage
 - **Source Repository**: GitHub URL (for star counts)
 - **Flags**: Mark as Featured or Verified
+
+## 🔐 Dynamic Values: Input vs Secrets
+
+All optional fields (NPM arguments, environment variables, HTTP headers) support structured metadata:
+
+### Format: `VALUE|description|isSecret`
+
+Each line has three parts separated by pipes (`|`):
+1. **VALUE**: The actual value/name
+2. **description**: Human-readable description
+3. **isSecret**: `true` for sensitive data, `false` for non-sensitive
+
+### Environment Variables
+
+**Format:** `NAME|description|secret`
+
+**Examples:**
+```
+API_KEY|Your API key for authentication|true
+GITHUB_TOKEN|GitHub personal access token|true
+DATABASE_NAME|Name of the database to connect to|false
+REGION|AWS region for deployment|false
+```
+
+This creates:
+```json
+"environmentVariables": [
+  {
+    "name": "API_KEY",
+    "description": "Your API key for authentication",
+    "isSecret": true,
+    "format": "string"
+  },
+  {
+    "name": "DATABASE_NAME",
+    "description": "Name of the database to connect to",
+    "isSecret": false,
+    "format": "string"
+  }
+]
+```
+
+### HTTP Headers
+
+**Format:** `NAME|description|secret`
+
+**Examples:**
+```
+Authorization|Bearer token for authentication|true
+X-API-Version|API version to use|false
+X-Client-ID|Client identifier|false
+```
+
+### NPM Arguments
+
+**Format:** `VALUE|description|secret`
+
+**Examples:**
+```
+myorg|Organization name|false
+myproject|Project identifier|false
+--token=TOKEN|Authentication token placeholder|true
+```
 
 ## 🤖 How the Automation Works
 
@@ -105,7 +170,7 @@ NPM Package Name: @modelcontextprotocol/server-brave-search
 }
 ```
 
-### Example 2: With Environment Variables
+### Example 2: With Secure Environment Variables
 
 ```
 Server ID: github
@@ -115,7 +180,49 @@ Tags: git, github, vcs
 Runtime Type: Node.js (npm)
 NPM Package Name: @modelcontextprotocol/server-github
 Environment Variables:
-GITHUB_TOKEN=${secret:github_token}
+GITHUB_TOKEN|GitHub personal access token|true
+GITHUB_ORG|GitHub organization name|false
+```
+
+**Result**: Creates environment variables array with proper `isSecret` flags.
+
+### Example 2b: With Additional Arguments (Input + Secret)
+
+```
+Server ID: azure-devops
+Vendor ID: azure-devops
+Display Name: Azure DevOps MCP Server
+Tags: azure, devops, git
+Runtime Type: Node.js (npm)
+NPM Package Name: @azure-devops/mcp
+Additional NPM Arguments:
+myorg|Organization name|false
+myproject|Project identifier|false
+Environment Variables:
+ADO_TOKEN|Azure DevOps personal access token|true
+ADO_URL|Azure DevOps URL|false
+```
+
+**Result**: Creates structured arguments and environment variables with proper secret flags.
+
+**Result**: Creates this JSON file:
+```json
+{
+  "id": "azure-devops",
+  "vendorId": "azure-devops",
+  "slug": "azure-devops",
+  "metadata": {
+    "name": "Azure DevOps MCP Server",
+    "tags": ["azure", "devops", "git"]
+  },
+  "versions": [{
+    "runtime": {
+      "type": "node",
+      "command": "npx",
+      "args": ["-y", "@azure-devops/mcp", "${input:ado_org}", "${input:ado_project}"]
+    }
+  }]
+}
 ```
 
 ### Example 3: Docker Container
@@ -144,6 +251,48 @@ HTTP Endpoint URL: https://api.github.com/mcp
 Source Repository: https://github.com/github/github-mcp-server
 ```
 
+### Example 5: HTTP Server with Headers (Secure + Non-Secure)
+
+```
+Server ID: custom-api
+Vendor ID: my-company
+Display Name: Custom API MCP Server
+Tags: api, http, custom
+Runtime Type: HTTP (Remote Server)
+HTTP Endpoint URL: https://api.mycompany.com/mcp
+HTTP Headers:
+Authorization|Bearer token for API authentication|true
+X-API-Version|API version (v2)|false
+X-Client-ID|Client identifier|false
+X-Tenant-ID|Tenant identifier|false
+```
+
+**Result**: Creates HTTP headers array with proper `isSecret` flags for authentication headers.
+
+**Result**: Creates this JSON file:
+```json
+{
+  "id": "custom-api",
+  "vendorId": "my-company",
+  "slug": "custom-api",
+  "metadata": {
+    "name": "Custom API MCP Server",
+    "tags": ["api", "http", "custom"]
+  },
+  "versions": [{
+    "runtime": {
+      "type": "http",
+      "url": "https://api.mycompany.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${secret:api_token}",
+        "X-API-Version": "v2",
+        "X-Client-ID": "${input:client_id}"
+      }
+    }
+  }]
+}
+```
+
 ## 🔧 Advanced: Manual PR Submission
 
 If you prefer to create the JSON file manually:
@@ -163,6 +312,69 @@ The automation validates:
 - ✅ Runtime configuration matches package type
 - ✅ Environment variables are properly formatted
 - ✅ JSON syntax is valid
+
+## 🔒 Security Best Practices
+
+### When to Use `${secret:var_name}`
+
+**Always use secrets for:**
+- ✅ API tokens and keys
+- ✅ Authentication credentials
+- ✅ Passwords
+- ✅ OAuth tokens
+- ✅ Private keys
+- ✅ Any data that could compromise security if exposed
+
+**Example:**
+```
+GITHUB_TOKEN=${secret:github_token}
+API_KEY=${secret:api_key}
+DATABASE_PASSWORD=${secret:db_password}
+Authorization=Bearer ${secret:oauth_token}
+```
+
+### When to Use `${input:var_name}`
+
+**Use inputs for:**
+- ✅ Organization/account names
+- ✅ Project IDs
+- ✅ Database names
+- ✅ Region/zone selections
+- ✅ File paths
+- ✅ Client IDs (if non-sensitive)
+- ✅ Any non-sensitive configuration
+
+**Example:**
+```
+ORGANIZATION=${input:org_name}
+PROJECT_ID=${input:project}
+REGION=${input:region}
+X-Client-ID=${input:client_id}
+```
+
+### When to Use Plain Text
+
+**Use plain text for:**
+- ✅ Static configuration values
+- ✅ API versions
+- ✅ Non-sensitive constants
+- ✅ Feature flags
+
+**Example:**
+```
+API_VERSION=v2
+REGION=us-west-2
+X-API-Version=2024-01-01
+--verbose
+```
+
+### ⚠️ Security Warning
+
+**Never include actual secrets or tokens in your submission!**
+- ❌ DON'T: `API_KEY=abc123token456`
+- ✅ DO: `API_KEY=${secret:api_key}`
+
+The `${secret:}` and `${input:}` placeholders ensure values are provided securely at runtime, not hardcoded in the registry.
 
 ## 🏷️ Server Tags
 

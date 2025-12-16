@@ -104,6 +104,13 @@ function validateServer(filePath) {
               errors.push(`versions[${index}].runtime.url: Invalid URL format`);
             }
           }
+          
+          // Validate headers if provided
+          if (runtime.headers) {
+            if (typeof runtime.headers !== 'object') {
+              errors.push(`versions[${index}].runtime.headers must be an object`);
+            }
+          }
         }
 
         // Environment variables validation

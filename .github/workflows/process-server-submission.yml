@@ -53,8 +53,10 @@ jobs:
             const tags = getFieldValue(issueBody, 'Tags').split(',').map(t => t.trim()).filter(Boolean);
             const runtimeType = getFieldValue(issueBody, 'Runtime Type');
             const npmPackage = getFieldValue(issueBody, 'NPM Package Name');
+            const npmArgs = getFieldValue(issueBody, 'Additional NPM Arguments \\(Optional\\)');
             const dockerImage = getFieldValue(issueBody, 'Docker Image');
             const httpUrl = getFieldValue(issueBody, 'HTTP Endpoint URL');
+            const httpHeaders = getFieldValue(issueBody, 'HTTP Headers \\(Optional\\)');
             const envVars = getFieldValue(issueBody, 'Environment Variables \\(Optional\\)');
             const descriptionOverride = getFieldValue(issueBody, 'Custom Description \\(Optional\\)');
             const homepageOverride = getFieldValue(issueBody, 'Custom Homepage URL \\(Optional\\)');
@@ -87,6 +89,29 @@ jobs:
                 command: 'npx',
                 args: ['-y', npmPackage]
               };
+              
+              // Add additional arguments if provided
+              if (npmArgs) {
+                const args = [];
+                npmArgs.split('\n').forEach(line => {
+                  const parts = line.split('|').map(s => s.trim());
+                  if (parts.length >= 3) {
+                    // VALUE|description|secret format
+                    const [value, description, isSecret] = parts;
+                    args.push({
+                      value: value,
+                      description: description,
+                      isSecret: isSecret.toLowerCase() === 'true'
+                    });
+                  } else if (parts.length === 1 && parts[0]) {
+                    // Simple value without metadata
+                    args.push({ value: parts[0], isSecret: false });
+                  }
+                });
+                if (args.length > 0) {
+                  runtime.additionalArgs = args;
+                }
+              }
             } else if (runtimeType.includes('Docker')) {
               if (!dockerImage) {
                 throw new Error('Docker image is required for Docker runtime');
@@ -109,21 +134,48 @@ jobs:
                 type: 'http',
                 url: httpUrl
               };
+              
+              // Add headers if provided
+              if (httpHeaders) {
+                const headers = [];
+                httpHeaders.split('\n').forEach(line => {
+                  const parts = line.split('|').map(s => s.trim());
+                  if (parts.length >= 3) {
+                    // NAME|description|secret format
+                    const [name, description, isSecret] = parts;
+                    headers.push({
+                      name: name,
+                      description: description,
+                      isSecret: isSecret.toLowerCase() === 'true'
+                    });
+                  }
+                });
+                if (headers.length > 0) {
+                  runtime.headers = headers;
+                }
+              }
             } else {
               throw new Error('Invalid runtime type');
             }
             
             // Add environment variables if provided
             if (envVars) {
-              const env = {};
+              const envVarsArray = [];
               envVars.split('\n').forEach(line => {
-                const [key, value] = line.split('=').map(s => s.trim());
-                if (key && value) {
-                  env[key] = value;
+                const parts = line.split('|').map(s => s.trim());
+                if (parts.length >= 3) {
+                  // NAME|description|secret format
+                  const [name, description, isSecret] = parts;
+                  envVarsArray.push({
+                    name: name,
+                    description: description,
+                    isSecret: isSecret.toLowerCase() === 'true',
+                    format: 'string'
+                  });
                 }
               });
-              if (Object.keys(env).length > 0) {
-                runtime.env = env;
+              if (envVarsArray.length > 0) {
+                runtime.environmentVariables = envVarsArray;
               }
             }
             
