@@ -1,14 +1,5 @@
 {
 	"servers": {
-		"azure/azdo": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"@azure-devops/mcp@2.2.2"
-			],
-			"gallery": "https://mcp-simple-registry.vercel.app/api",
-			"version": "2.2.2"
-		}
 	},
 	"inputs": []
 }
