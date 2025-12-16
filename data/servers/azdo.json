@@ -1,0 +1,39 @@
+{
+  "id": "azdo",
+  "vendorId": "azure",
+  "slug": "azdo",
+  "metadata": {
+    "name": "Azure DevOps MCP",
+    "tags": [
+      "azdo",
+      "devops",
+      "azure",
+      "official",
+      "npm"
+    ],
+    "description": "_No response_",
+    "homepage": "https://github.com/mcp/microsoft/azure-devops-mcp",
+    "sourceUrl": "https://github.com/microsoft/azure-devops-mcp"
+  },
+  "versions": [
+    {
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@azure-devops/mcp"
+        ],
+        "additionalArgs": [
+          {
+            "value": "ado_org",
+            "description": "Azure DevOps Organization",
+            "isSecret": false
+          }
+        ]
+      }
+    }
+  ],
+  "featured": true,
+  "verified": true
+}
