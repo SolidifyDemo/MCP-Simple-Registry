@@ -1,15 +1,22 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Server, MCPServerEntry, MCPServerSchema, MCPServersResponse } from './types';
+import { getPackageInfo, fetchGitHubStars } from './registry-fetcher';
 
 let cachedServers: Server[] | null = null;
+let lastCacheTime: number = 0;
 
 /**
  * Load servers from individual JSON files in data/servers/ directory
  * Results are cached for performance
+ * Optionally enriches data from registries
  */
-export async function loadServers(): Promise<Server[]> {
-  if (cachedServers !== null) {
+export async function loadServers(enrichFromRegistry: boolean = process.env.ENABLE_REGISTRY_FETCHING !== 'false'): Promise<Server[]> {
+  const now = Date.now();
+  const cacheDuration = parseInt(process.env.CACHE_DURATION || '3600000');
+  
+  // Return cached servers if cache is still valid
+  if (cachedServers !== null && (now - lastCacheTime) < cacheDuration) {
     return cachedServers;
   }
 
@@ -26,10 +33,67 @@ export async function loadServers(): Promise<Server[]> {
       const filePath = path.join(serversDir, file);
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const server = JSON.parse(fileContent);
+      
+      // Enrich with live registry data if enabled
+      if (enrichFromRegistry && server.versions?.length > 0) {
+        try {
+          const latestVersion = server.versions[0];
+          const registryInfo = await getPackageInfo(latestVersion.runtime, server.metadata?.sourceUrl);
+          
+          // Update version info if available from registry
+          if (registryInfo.version) {
+            latestVersion.version = registryInfo.version;
+          }
+          if (registryInfo.publishedAt) {
+            latestVersion.releaseDate = registryInfo.publishedAt;
+          }
+          
+          // Update server metadata if available
+          if (registryInfo.description && !server.metadata.description) {
+            server.metadata.description = registryInfo.description;
+          }
+          if (registryInfo.homepage && !server.metadata.homepage) {
+            server.metadata.homepage = registryInfo.homepage;
+          }
+          if (registryInfo.license && !server.metadata.license) {
+            server.metadata.license = registryInfo.license;
+          }
+          if (registryInfo.repository && !server.metadata.sourceUrl) {
+            server.metadata.sourceUrl = registryInfo.repository;
+          }
+          
+          // Update stats
+          if (!server.stats) {
+            server.stats = {};
+          }
+          if (registryInfo.downloads !== undefined) {
+            server.stats.downloads = registryInfo.downloads;
+          }
+          if (registryInfo.stars !== undefined) {
+            server.stats.stars = registryInfo.stars;
+          }
+          
+          // Fetch GitHub stars if we have a sourceUrl and no stars yet
+          if (server.metadata.sourceUrl && !server.stats.stars) {
+            const stars = await fetchGitHubStars(server.metadata.sourceUrl);
+            if (stars > 0) {
+              server.stats.stars = stars;
+            }
+          }
+          
+          // Update the updatedAt timestamp
+          server.updatedAt = new Date().toISOString();
+        } catch (error) {
+          // Log but don't fail - use static data as fallback
+          console.warn(`Failed to enrich server ${server.id} from registry:`, error instanceof Error ? error.message : error);
+        }
+      }
+      
       servers.push(server);
     }
     
     cachedServers = servers;
+    lastCacheTime = now;
     return servers;
   } catch (error) {
     console.error('Error loading servers:', error);
@@ -42,6 +106,7 @@ export async function loadServers(): Promise<Server[]> {
  */
 export function clearCache(): void {
   cachedServers = null;
+  lastCacheTime = 0;
 }
 
 /**
@@ -86,17 +151,17 @@ export async function searchServers(filter: ServerFilter = {}): Promise<Paginate
   if (filter.query) {
     const query = filter.query.toLowerCase();
     servers = servers.filter(server => 
-      server.metadata.name.toLowerCase().includes(query) ||
-      server.metadata.description.toLowerCase().includes(query) ||
+      server.metadata?.name?.toLowerCase().includes(query) ||
+      server.metadata?.description?.toLowerCase().includes(query) ||
       server.slug.toLowerCase().includes(query) ||
-      server.metadata.tags?.some(tag => tag.toLowerCase().includes(query))
+      server.metadata?.tags?.some(tag => tag.toLowerCase().includes(query))
     );
   }
 
   if (filter.tags && filter.tags.length > 0) {
     servers = servers.filter(server =>
       filter.tags!.some(tag => 
-        server.metadata.tags?.includes(tag)
+        server.metadata?.tags?.includes(tag)
       )
     );
   }
@@ -185,7 +250,7 @@ export async function getAllTags(): Promise<string[]> {
   const tagsSet = new Set<string>();
   
   servers.forEach(server => {
-    server.metadata.tags?.forEach(tag => tagsSet.add(tag));
+    server.metadata?.tags?.forEach(tag => tagsSet.add(tag));
   });
   
   return Array.from(tagsSet).sort();
@@ -251,9 +316,9 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
     const mcpSchema: MCPServerSchema = {
       $schema: 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json',
       name: `${server.vendorId}/${server.slug}`,
-      description: server.metadata.description,
+      description: server.metadata?.description || '',
       version: version.version,
-      repository: server.metadata.sourceUrl ? {
+      repository: server.metadata?.sourceUrl ? {
         url: server.metadata.sourceUrl,
         source: 'github' // Default to github, can be inferred from URL
       } : {},
@@ -261,15 +326,15 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
     };
 
     // Add optional fields
-    if (server.metadata.name !== `${server.vendorId}/${server.slug}`) {
+    if (server.metadata?.name && server.metadata.name !== `${server.vendorId}/${server.slug}`) {
       mcpSchema.title = server.metadata.name;
     }
 
-    if (server.metadata.homepage) {
+    if (server.metadata?.homepage) {
       mcpSchema.websiteUrl = server.metadata.homepage;
     }
 
-    if (server.metadata.logoUrl) {
+    if (server.metadata?.logoUrl) {
       mcpSchema.icons = [{
         src: server.metadata.logoUrl
       }];

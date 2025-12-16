@@ -1,0 +1,27 @@
+{
+    "id": "github-http",
+    "vendorId": "github",
+    "slug": "github-http",
+    "metadata": {
+        "name": "GitHub MCP Server (HTTP)",
+        "description": "Official GitHub MCP server accessible via HTTP protocol. Provides Git operations, repository management, and code interactions through a remote HTTP endpoint.",
+        "sourceUrl": "https://github.com/github/github-mcp-server",
+        "tags": [
+            "git",
+            "github",
+            "version-control",
+            "official",
+            "http"
+        ]
+    },
+    "versions": [
+        {
+            "runtime": {
+                "type": "http",
+                "url": "https://api.github.com/mcp"
+            }
+        }
+    ],
+    "featured": true,
+    "verified": true
+}

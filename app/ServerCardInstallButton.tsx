@@ -7,7 +7,11 @@ interface ServerCardInstallButtonProps {
 }
 
 export default function ServerCardInstallButton({ server }: ServerCardInstallButtonProps) {
-  const latestVersion = server.versions[0];
+  const latestVersion = server.versions?.[0];
+
+  if (!latestVersion) {
+    return null; // No versions available
+  }
 
   let config: Record<string, unknown>;
   

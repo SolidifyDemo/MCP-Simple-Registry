@@ -1,0 +1,30 @@
+{
+  "id": "rickardhf-gh",
+  "vendorId": "rickardhf",
+  "slug": "rickardhf-gh",
+  "metadata": {
+    "name": "RickardHF's GitHub Security MCP Server",
+    "description": "Get access to RickardHF's GitHub Security MCP server for testing and development purposes.",
+    "sourceUrl": "https://github.com/RickardHF/GitHub-Security-MCP-Server",
+    "homepage": "https://www.npmjs.com/package/@rickardhf/github-security-mcp-server",
+    "tags": [
+      "npx",
+      "custom",
+      "github",
+      "rickardhf"
+    ]
+  },
+  "versions": [
+    {
+      "runtime": {
+        "type": "stdio",
+        "command": "npx",
+        "args": [
+          "@rickardhf/github-security-mcp-server"
+        ]
+      }
+    }
+  ],
+  "featured": true,
+  "verified": true
+}

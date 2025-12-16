@@ -1,0 +1,37 @@
+{
+    "id": "github-docker",
+    "vendorId": "github",
+    "slug": "github-docker",
+    "metadata": {
+        "name": "GitHub MCP Server (Docker)",
+        "description": "Official GitHub MCP server for Git operations, repository management, and code interactions. Runs via Docker container.",
+        "sourceUrl": "https://github.com/github/github-mcp-server",
+        "tags": [
+            "git",
+            "github",
+            "version-control",
+            "official",
+            "docker"
+        ]
+    },
+    "versions": [
+        {
+            "runtime": {
+                "command": "docker",
+                "args": [
+                    "run",
+                    "-i",
+                    "--rm",
+                    "-e",
+                    "GITHUB_PERSONAL_ACCESS_TOKEN",
+                    "ghcr.io/github/github-mcp-server"
+                ],
+                "env": {
+                    "GITHUB_PERSONAL_ACCESS_TOKEN": "${input:github_token}"
+                }
+            }
+        }
+    ],
+    "featured": true,
+    "verified": true
+}

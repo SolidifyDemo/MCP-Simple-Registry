@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "MCP Server Configuration (Minimal)",
+  "description": "Minimal server configuration - most fields will be auto-fetched from registries",
+  "type": "object",
+  "required": ["id", "vendorId", "slug", "metadata", "versions"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the server"
+    },
+    "vendorId": {
+      "type": "string",
+      "description": "Vendor/organization identifier (e.g., 'modelcontextprotocol', 'community')"
+    },
+    "slug": {
+      "type": "string",
+      "description": "URL-friendly identifier"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["name", "tags"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the server"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Categorization tags (e.g., ['search', 'web', 'api'])"
+        },
+        "description": {
+          "type": "string",
+          "description": "OPTIONAL - Will be fetched from npm/Docker Hub if not provided"
+        },
+        "homepage": {
+          "type": "string",
+          "description": "OPTIONAL - Will be fetched from npm if not provided"
+        },
+        "license": {
+          "type": "string",
+          "description": "OPTIONAL - Will be fetched from npm if not provided"
+        },
+        "sourceUrl": {
+          "type": "string",
+          "description": "OPTIONAL - Will be fetched from npm/manually for GitHub stars"
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "OPTIONAL - Custom logo URL"
+        },
+        "maintainers": {
+          "type": "array",
+          "description": "OPTIONAL - Maintainer information"
+        }
+      }
+    },
+    "versions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["runtime"],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "OPTIONAL - Will be fetched from registry. Use 'latest' or 'auto' as placeholder"
+          },
+          "releaseDate": {
+            "type": "string",
+            "description": "OPTIONAL - Will be fetched from registry. Use 'auto' as placeholder"
+          },
+          "changelog": {
+            "type": "string",
+            "description": "OPTIONAL - Custom changelog notes"
+          },
+          "runtime": {
+            "type": "object",
+            "description": "REQUIRED - Runtime configuration (this is what gets used to fetch from registries)",
+            "oneOf": [
+              {
+                "description": "NPM package configuration",
+                "properties": {
+                  "type": { "const": "node" },
+                  "command": { "const": "npx" },
+                  "args": {
+                    "type": "array",
+                    "description": "Must include the package name, e.g., ['-y', '@org/package-name']"
+                  }
+                },
+                "required": ["type", "command", "args"]
+              },
+              {
+                "description": "Docker image configuration",
+                "properties": {
+                  "type": { "const": "docker" },
+                  "image": {
+                    "type": "string",
+                    "description": "Docker image (tag optional, will fetch latest available)"
+                  }
+                },
+                "required": ["type", "image"]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "stats": {
+      "type": "object",
+      "description": "OPTIONAL - Will be auto-populated from registries",
+      "properties": {
+        "downloads": { "type": "number" },
+        "stars": { "type": "number" }
+      }
+    },
+    "featured": {
+      "type": "boolean",
+      "description": "OPTIONAL - Mark as featured server"
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "OPTIONAL - Mark as verified server"
+    }
+  }
+}

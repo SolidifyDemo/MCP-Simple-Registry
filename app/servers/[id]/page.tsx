@@ -37,10 +37,10 @@ export default async function ServerPage({
           <div className="flex items-start justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                {server.metadata.name}
+                {server.metadata?.name || server.id}
               </h1>
               <p className="text-xl text-gray-600 dark:text-gray-400">
-                {server.metadata.description}
+                {server.metadata?.description || 'No description available'}
               </p>
             </div>
             <div className="flex gap-2">
@@ -74,7 +74,7 @@ export default async function ServerPage({
             <div>
               <span className="text-sm text-gray-500 dark:text-gray-400">License:</span>
               <span className="ml-2 text-gray-900 dark:text-white">
-                {server.metadata.license || 'Not specified'}
+                {server.metadata?.license || 'Not specified'}
               </span>
             </div>
             <div>
@@ -91,7 +91,7 @@ export default async function ServerPage({
               Tags
             </h3>
             <div className="flex flex-wrap gap-2">
-              {server.metadata.tags?.map((tag) => (
+              {server.metadata?.tags?.map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
@@ -134,7 +134,7 @@ export default async function ServerPage({
 
           {/* Links */}
           <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-            {server.metadata.homepage && (
+            {server.metadata?.homepage && (
               <a
                 href={server.metadata.homepage}
                 target="_blank"
@@ -144,7 +144,7 @@ export default async function ServerPage({
                 Homepage →
               </a>
             )}
-            {server.metadata.sourceUrl && (
+            {server.metadata?.sourceUrl && (
               <a
                 href={server.metadata.sourceUrl}
                 target="_blank"
@@ -278,18 +278,20 @@ export default async function ServerPage({
             Version History
           </h2>
           <div className="space-y-4">
-            {server.versions.map((version) => (
+            {server.versions.map((version, index) => (
               <div 
-                key={version.version}
+                key={version.version || `version-${index}`}
                 className="border-l-4 border-blue-500 pl-4 py-2"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono font-bold text-gray-900 dark:text-white">
-                    v{version.version}
+                    {version.version ? `v${version.version}` : 'Latest'}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(version.releaseDate).toLocaleDateString()}
-                  </span>
+                  {version.releaseDate && (
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(version.releaseDate).toLocaleDateString()}
+                    </span>
+                  )}
                   {version.deprecated && (
                     <span className="text-xs px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 rounded">
                       Deprecated
@@ -312,7 +314,7 @@ export default async function ServerPage({
         </div>
 
         {/* Maintainers */}
-        {server.metadata.maintainers && server.metadata.maintainers.length > 0 && (
+        {server.metadata?.maintainers && server.metadata.maintainers.length > 0 && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               Maintainers

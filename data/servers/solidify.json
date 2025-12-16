@@ -1,0 +1,27 @@
+{
+  "id": "solidify-internal",
+  "vendorId": "solidify",
+  "slug": "solidify-internal",
+  "metadata": {
+    "name": "Internal Solidify Server",
+    "description": "Get access to Solidify's internal MCP server for testing and development purposes.",
+    "sourceUrl": "https://github.com/example/mcp-http-server",
+    "homepage": "https://github.com/solidify-internal/internal-mcp-server",
+    "tags": [
+      "http",
+      "remote",
+      "api",
+      "solidify"
+    ]
+  },
+  "versions": [
+    {
+      "runtime": {
+        "type": "http",
+        "url": "https://internal-mcp-server.livelyglacier-ae8f4bd5.westeurope.azurecontainerapps.io/"
+      }
+    }
+  ],
+  "featured": true,
+  "verified": true
+}
