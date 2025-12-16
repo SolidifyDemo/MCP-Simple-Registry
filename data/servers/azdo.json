@@ -21,7 +21,8 @@
         "command": "npx",
         "args": [
           "-y",
-          "@azure-devops/mcp"
+          "@azure-devops/mcp",
+          "${input:ado_org}"
         ],
         "additionalArgs": [
           {

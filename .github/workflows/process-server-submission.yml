@@ -98,14 +98,20 @@ jobs:
                   if (parts.length >= 3) {
                     // VALUE|description|secret format
                     const [value, description, isSecret] = parts;
-                    args.push({
+                    const argMetadata = {
                       value: value,
                       description: description,
                       isSecret: isSecret.toLowerCase() === 'true'
-                    });
+                    };
+                    args.push(argMetadata);
+                    
+                    // Also add to runtime.args array with proper placeholder
+                    const placeholder = argMetadata.isSecret ? `\${secret:${value}}` : `\${input:${value}}`;
+                    runtime.args.push(placeholder);
                   } else if (parts.length === 1 && parts[0]) {
                     // Simple value without metadata
                     args.push({ value: parts[0], isSecret: false });
+                    runtime.args.push(`\${input:${parts[0]}}`);
                   }
                 });
                 if (args.length > 0) {
