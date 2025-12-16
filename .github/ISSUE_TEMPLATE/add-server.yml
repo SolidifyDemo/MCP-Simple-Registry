@@ -1,0 +1,135 @@
+name: 🚀 Add New MCP Server
+description: Submit a new MCP server to the registry
+title: "[Server Request] "
+labels: ["server-submission", "automation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for submitting a new MCP server! Please fill out the required information below.
+        
+        **Note:** Only minimal information is required. Version, description, and stats will be auto-fetched from registries (npm/Docker Hub).
+        
+        See [MINIMAL_CONFIG.md](https://github.com/SolidifyDemo/MCP-Simple-Registry/blob/main/docs/MINIMAL_CONFIG.md) for examples.
+
+  - type: input
+    id: server-id
+    attributes:
+      label: Server ID
+      description: Unique identifier for the server (lowercase, alphanumeric, hyphens only)
+      placeholder: "e.g., brave-search, postgres-analyzer"
+    validations:
+      required: true
+
+  - type: input
+    id: vendor-id
+    attributes:
+      label: Vendor/Organization ID
+      description: Your organization or username (lowercase, alphanumeric, hyphens only)
+      placeholder: "e.g., modelcontextprotocol, my-company"
+    validations:
+      required: true
+
+  - type: input
+    id: display-name
+    attributes:
+      label: Display Name
+      description: Human-readable name for the server
+      placeholder: "e.g., Brave Search Server"
+    validations:
+      required: true
+
+  - type: textarea
+    id: tags
+    attributes:
+      label: Tags
+      description: Comma-separated list of tags (categories, features, etc.)
+      placeholder: "e.g., search, web, api"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: runtime-type
+    attributes:
+      label: Runtime Type
+      description: Choose the runtime environment
+      options:
+        - Node.js (npm)
+        - Docker
+        - HTTP (Remote Server)
+    validations:
+      required: true
+
+  - type: input
+    id: npm-package
+    attributes:
+      label: NPM Package Name
+      description: For Node.js runtime - full package name (e.g., @org/package)
+      placeholder: "e.g., @modelcontextprotocol/server-brave-search"
+
+  - type: input
+    id: docker-image
+    attributes:
+      label: Docker Image
+      description: For Docker runtime - image name (without tag, we'll fetch latest)
+      placeholder: "e.g., mcp/my-server or ghcr.io/org/image"
+
+  - type: input
+    id: http-url
+    attributes:
+      label: HTTP Endpoint URL
+      description: For HTTP runtime - the remote server endpoint URL
+      placeholder: "e.g., https://api.example.com/mcp"
+
+  - type: textarea
+    id: env-vars
+    attributes:
+      label: Environment Variables (Optional)
+      description: |
+        Required environment variables, one per line in KEY=value format.
+        Use ${input:var_name} for user input, ${secret:var_name} for secrets.
+      placeholder: |
+        API_KEY=${input:api_key}
+        SECRET_TOKEN=${secret:token}
+
+  - type: textarea
+    id: description-override
+    attributes:
+      label: Custom Description (Optional)
+      description: Override auto-fetched description from registry
+
+  - type: input
+    id: homepage-override
+    attributes:
+      label: Custom Homepage URL (Optional)
+      description: Override auto-fetched homepage from registry
+
+  - type: input
+    id: source-url
+    attributes:
+      label: Source Repository URL (Optional)
+      description: GitHub repository URL (for star count)
+      placeholder: "https://github.com/org/repo"
+
+  - type: checkboxes
+    id: flags
+    attributes:
+      label: Server Flags
+      options:
+        - label: Mark as Featured (highlight this server)
+        - label: Mark as Verified (official/trusted server)
+
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: Additional Notes
+      description: Any other information about this server
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

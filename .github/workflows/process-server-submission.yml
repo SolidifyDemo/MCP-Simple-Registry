@@ -1,0 +1,299 @@
+name: Process Server Submission
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  process-server-submission:
+    if: contains(github.event.issue.labels.*.name, 'server-submission')
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Parse issue and create server JSON
+        id: create-json
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Parse issue body (GitHub form format)
+            const issueBody = context.payload.issue.body;
+            
+            // Helper function to extract field value
+            function getFieldValue(body, fieldName) {
+              const regex = new RegExp(`### ${fieldName}\\s*\\n\\s*(.+?)(?=\\n###|$)`, 's');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            }
+            
+            // Extract all fields
+            const serverId = getFieldValue(issueBody, 'Server ID');
+            const vendorId = getFieldValue(issueBody, 'Vendor/Organization ID');
+            const displayName = getFieldValue(issueBody, 'Display Name');
+            const tags = getFieldValue(issueBody, 'Tags').split(',').map(t => t.trim()).filter(Boolean);
+            const runtimeType = getFieldValue(issueBody, 'Runtime Type');
+            const npmPackage = getFieldValue(issueBody, 'NPM Package Name');
+            const dockerImage = getFieldValue(issueBody, 'Docker Image');
+            const httpUrl = getFieldValue(issueBody, 'HTTP Endpoint URL');
+            const envVars = getFieldValue(issueBody, 'Environment Variables \\(Optional\\)');
+            const descriptionOverride = getFieldValue(issueBody, 'Custom Description \\(Optional\\)');
+            const homepageOverride = getFieldValue(issueBody, 'Custom Homepage URL \\(Optional\\)');
+            const sourceUrl = getFieldValue(issueBody, 'Source Repository URL \\(Optional\\)');
+            const flags = getFieldValue(issueBody, 'Server Flags');
+            
+            // Validate required fields
+            if (!serverId || !vendorId || !displayName || tags.length === 0) {
+              throw new Error('Missing required fields');
+            }
+            
+            // Validate server ID format (lowercase, alphanumeric, hyphens only)
+            if (!/^[a-z0-9-]+$/.test(serverId)) {
+              throw new Error('Server ID must be lowercase alphanumeric with hyphens only');
+            }
+            
+            // Validate vendor ID format
+            if (!/^[a-z0-9-]+$/.test(vendorId)) {
+              throw new Error('Vendor ID must be lowercase alphanumeric with hyphens only');
+            }
+            
+            // Build runtime config
+            let runtime = {};
+            if (runtimeType.includes('Node.js')) {
+              if (!npmPackage) {
+                throw new Error('NPM package name is required for Node.js runtime');
+              }
+              runtime = {
+                type: 'node',
+                command: 'npx',
+                args: ['-y', npmPackage]
+              };
+            } else if (runtimeType.includes('Docker')) {
+              if (!dockerImage) {
+                throw new Error('Docker image is required for Docker runtime');
+              }
+              runtime = {
+                type: 'docker',
+                image: dockerImage
+              };
+            } else if (runtimeType.includes('HTTP')) {
+              if (!httpUrl) {
+                throw new Error('HTTP endpoint URL is required for HTTP runtime');
+              }
+              // Validate URL format
+              try {
+                new URL(httpUrl);
+              } catch {
+                throw new Error('Invalid HTTP endpoint URL format');
+              }
+              runtime = {
+                type: 'http',
+                url: httpUrl
+              };
+            } else {
+              throw new Error('Invalid runtime type');
+            }
+            
+            // Add environment variables if provided
+            if (envVars) {
+              const env = {};
+              envVars.split('\n').forEach(line => {
+                const [key, value] = line.split('=').map(s => s.trim());
+                if (key && value) {
+                  env[key] = value;
+                }
+              });
+              if (Object.keys(env).length > 0) {
+                runtime.env = env;
+              }
+            }
+            
+            // Build minimal server JSON
+            const serverJson = {
+              id: serverId,
+              vendorId: vendorId,
+              slug: serverId,
+              metadata: {
+                name: displayName,
+                tags: tags
+              },
+              versions: [
+                {
+                  runtime: runtime
+                }
+              ]
+            };
+            
+            // Add optional overrides
+            if (descriptionOverride) {
+              serverJson.metadata.description = descriptionOverride;
+            }
+            if (homepageOverride) {
+              serverJson.metadata.homepage = homepageOverride;
+            }
+            if (sourceUrl) {
+              serverJson.metadata.sourceUrl = sourceUrl;
+            }
+            
+            // Add flags if checked
+            if (flags.includes('Mark as Featured')) {
+              serverJson.featured = true;
+            }
+            if (flags.includes('Mark as Verified')) {
+              serverJson.verified = true;
+            }
+            
+            // Write to file
+            const filePath = path.join('data', 'servers', `${serverId}.json`);
+            fs.writeFileSync(filePath, JSON.stringify(serverJson, null, 2) + '\n');
+            
+            console.log(`Created ${filePath}`);
+            console.log(JSON.stringify(serverJson, null, 2));
+            
+            // Set outputs
+            core.setOutput('server-id', serverId);
+            core.setOutput('vendor-id', vendorId);
+            core.setOutput('file-path', filePath);
+            
+            return {
+              serverId,
+              vendorId,
+              filePath,
+              success: true
+            };
+
+      - name: Validate server JSON
+        run: |
+          node -e "
+          const fs = require('fs');
+          const serverJson = JSON.parse(fs.readFileSync('${{ steps.create-json.outputs.file-path }}', 'utf8'));
+          
+          // Basic validation
+          if (!serverJson.id || !serverJson.vendorId || !serverJson.slug) {
+            throw new Error('Missing required fields: id, vendorId, or slug');
+          }
+          
+          if (!serverJson.metadata || !serverJson.metadata.name || !serverJson.metadata.tags) {
+            throw new Error('Missing required metadata: name or tags');
+          }
+          
+          if (!serverJson.versions || serverJson.versions.length === 0) {
+            throw new Error('At least one version is required');
+          }
+          
+          console.log('✅ Validation passed');
+          "
+
+      - name: Create Pull Request
+        id: create-pr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Add new MCP server: ${{ steps.create-json.outputs.server-id }}"
+          branch: server/${{ steps.create-json.outputs.server-id }}
+          delete-branch: true
+          title: "Add MCP Server: ${{ steps.create-json.outputs.server-id }}"
+          body: |
+            ## New MCP Server Submission
+            
+            **Server ID:** `${{ steps.create-json.outputs.server-id }}`
+            **Vendor:** `${{ steps.create-json.outputs.vendor-id }}`
+            
+            This PR was automatically created from issue #${{ github.event.issue.number }}
+            
+            ### Checklist
+            - [x] Server JSON created in minimal format
+            - [x] Basic validation passed
+            - [ ] Manual review needed
+            - [ ] Test API endpoint after merge
+            
+            ### Preview
+            After merging, the server will be available at:
+            - API: `/api/v0/servers/${{ steps.create-json.outputs.server-id }}`
+            - Web: `/servers/${{ steps.create-json.outputs.server-id }}`
+            
+            Closes #${{ github.event.issue.number }}
+          labels: |
+            server-addition
+            automated-pr
+
+      - name: Comment on issue
+        if: steps.create-pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ **Server JSON created successfully!**
+              
+              A pull request has been opened: #${{ steps.create-pr.outputs.pull-request-number }}
+              
+              The server will be added to the registry once the PR is reviewed and merged.
+              
+              **File created:** \`${{ steps.create-json.outputs.file-path }}\`
+              
+              Thank you for your contribution! 🎉`
+            });
+
+      - name: Add success label
+        if: steps.create-pr.outputs.pull-request-number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['automated']
+            });
+
+      - name: Handle errors
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `❌ **Failed to process server submission**
+              
+              There was an error creating the server JSON file. Please check:
+              
+              1. All required fields are filled out correctly
+              2. Server ID and Vendor ID use only lowercase letters, numbers, and hyphens
+              3. Runtime type matches the package/image provided
+              4. Environment variables are in correct format (KEY=value)
+              
+              Please update the issue and we'll try again automatically.
+              
+              Check the [workflow logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.`
+            });
+            
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['needs-fix']
+            });

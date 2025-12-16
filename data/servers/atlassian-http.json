@@ -1,0 +1,27 @@
+{
+    "id": "atlassian-http",
+    "vendorId": "atlassian",
+    "slug": "atlassian-http",
+    "metadata": {
+        "name": "Atlassian MCP Server (HTTP)",
+        "homepage": "https://www.atlassian.com/platform/remote-mcp-server",
+        "sourceUrl": "https://github.com/atlassian/atlassian-mcp-server",
+        "tags": [
+            "git",
+            "github",
+            "version-control",
+            "official",
+            "http"
+        ]
+    },
+    "versions": [
+        {
+            "runtime": {
+                "type": "http",
+                "url": "https://mcp.atlassian.com/v1/sse"
+            }
+        }
+    ],
+    "featured": true,
+    "verified": true
+}

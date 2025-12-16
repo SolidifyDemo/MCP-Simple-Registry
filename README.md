@@ -13,6 +13,7 @@ A Model Context Protocol (MCP) server registry that provides both a web interfac
 - ⭐ **Featured & Verified** - Highlight trusted and popular servers
 - 🚀 **Dynamic Registry Fetching** - Automatically fetches latest versions and stats from npm, Docker Hub, and GitHub
 - ⚡ **Smart Caching** - Intelligent caching reduces external API calls while keeping data fresh
+- 🤖 **IssueOps** - Add new servers via GitHub issues with automated PR creation
 
 ## API Documentation
 
@@ -76,6 +77,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Documentation
 
+- **[Contributing Guide](./CONTRIBUTING.md)** - Add servers via GitHub issues (IssueOps)
 - **[Minimal Server Configuration](./docs/MINIMAL_CONFIG.md)** - Quick guide to adding servers (minimal JSON)
 - [API Documentation](./API.md) - Complete API reference
 - [Dynamic Registry Fetching](./docs/REGISTRY_FETCHING.md) - Auto-updating from npm, Docker Hub, and GitHub
