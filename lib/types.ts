@@ -31,13 +31,14 @@ export interface Remote {
 }
 
 export interface Package {
-  registryType: 'npm' | 'pypi' | string;
-  registryBaseUrl: string;
+  registryType: 'npm' | 'pypi' | 'oci' | string;
+  registryBaseUrl?: string;
   identifier: string;
-  version: string;
+  version?: string;
   transport?: {
     type: 'stdio' | 'http' | 'sse';
   };
+  [key: string]: unknown; // Allow additional properties like environmentVariables
 }
 
 export interface MCPServerEntry {

@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Server, MCPServerEntry, MCPServerSchema, MCPServersResponse } from './types';
+import { Server, MCPServerEntry, MCPServerSchema, MCPServersResponse, Package } from './types';
 import { getPackageInfo, fetchGitHubStars } from './registry-fetcher';
 
 let cachedServers: Server[] | null = null;
@@ -358,7 +358,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
       }];
     } else if (version.runtime.type === 'docker' && 'image' in version.runtime) {
       // Docker with explicit type and image field
-      const pkg: any = {
+      const pkg: Package = {
         registryType: 'oci',
         identifier: version.runtime.image,
         transport: {
@@ -385,7 +385,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
       );
       
       if (imageArg) {
-        const pkg: any = {
+        const pkg: Package = {
           registryType: 'oci',
           identifier: imageArg.startsWith('docker.io/') ? imageArg : `docker.io/${imageArg}`,
           transport: {

@@ -3,6 +3,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import InstallButton from './InstallButton';
 
+// Type helper to check if runtime has a command property
+function hasCommand(runtime: any): runtime is { command: string; args?: string[]; env?: Record<string, string> } {
+  return 'command' in runtime && typeof runtime.command === 'string';
+}
+
 export default async function ServerPage({ 
   params 
 }: { 
@@ -16,6 +21,7 @@ export default async function ServerPage({
   }
 
   const latestVersion = server.versions[0];
+  const runtime = latestVersion.runtime;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -169,24 +175,35 @@ export default async function ServerPage({
           {/* Runtime Type Badge */}
           <div className="mb-4">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-              {(latestVersion.runtime.type || 
-                (latestVersion.runtime.command === 'docker' ? 'DOCKER' : 
-                 latestVersion.runtime.command === 'npx' ? 'NPX' : 
-                 latestVersion.runtime.command?.toUpperCase() || 'UNKNOWN')).toUpperCase()} Runtime
+              {(() => {
+                if (runtime.type) return runtime.type.toUpperCase();
+                if (hasCommand(runtime)) {
+                  const cmd = runtime as { command: string; args?: string[]; env?: Record<string, string> };
+                  if (cmd.command === 'docker') return 'DOCKER';
+                  if (cmd.command === 'npx') return 'NPX';
+                  return cmd.command.toUpperCase();
+                }
+                return 'UNKNOWN';
+              })()} Runtime
             </span>
           </div>
 
           {/* Command/URL Display */}
           <div className="bg-gray-900 dark:bg-black rounded-lg p-4 overflow-x-auto mb-4">
             <code className="text-sm text-green-400">
-              {latestVersion.runtime.type === 'http' && latestVersion.runtime.url}
-              {(latestVersion.runtime.type === 'docker' || latestVersion.runtime.command === 'docker') && 
-                (latestVersion.runtime.image ? `docker run ${latestVersion.runtime.image}` : 
-                 latestVersion.runtime.args ? `docker ${latestVersion.runtime.args.join(' ')}` : 'docker run')}
-              {latestVersion.runtime.type === 'pip' && `pip install ${latestVersion.runtime.package}`}
-              {(latestVersion.runtime.type === 'node' || latestVersion.runtime.type === 'python' || latestVersion.runtime.type === 'binary' ||
-                (latestVersion.runtime.command && !['docker', 'http'].includes(latestVersion.runtime.command))) && 
-                `${latestVersion.runtime.command} ${latestVersion.runtime.args?.join(' ') || ''}`}
+              {(() => {
+                if (runtime.type === 'http' && 'url' in runtime) return runtime.url;
+                if (runtime.type === 'docker' && 'image' in runtime) return `docker run ${runtime.image}`;
+                if (runtime.type === 'pip' && 'package' in runtime) return `pip install ${runtime.package}`;
+                if (hasCommand(runtime)) {
+                  const cmd = runtime as { command: string; args?: string[]; env?: Record<string, string> };
+                  if (cmd.command === 'docker') {
+                    return cmd.args ? `docker ${cmd.args.join(' ')}` : 'docker run';
+                  }
+                  return `${cmd.command} ${cmd.args ? cmd.args.join(' ') : ''}`;
+                }
+                return 'No command available';
+              })()}
             </code>
           </div>
           
@@ -199,38 +216,41 @@ export default async function ServerPage({
             </p>
             <div className="bg-white dark:bg-gray-950 rounded p-3 overflow-x-auto">
               <pre className="text-xs text-gray-800 dark:text-gray-200">
-{latestVersion.runtime.type === 'http' ? `{
-  "mcpServers": {
-    "${server.slug}": ${JSON.stringify({
-      url: latestVersion.runtime.url,
-      headers: latestVersion.runtime.headers || {}
-    }, null, 6).split('\n').join('\n    ')}
-  }
-}` : (latestVersion.runtime.type === 'docker' || latestVersion.runtime.command === 'docker') ? `{
-  "mcpServers": {
-    "${server.slug}": ${JSON.stringify({
-      command: latestVersion.runtime.command || 'docker',
-      args: latestVersion.runtime.args || [],
-      env: latestVersion.runtime.env || {}
-    }, null, 6).split('\n').join('\n    ')}
-  }
-}` : latestVersion.runtime.type === 'pip' ? `{
-  "mcpServers": {
-    "${server.slug}": ${JSON.stringify({
+{(() => {
+  let config: any;
+  if (runtime.type === 'http' && 'url' in runtime) {
+    config = {
+      url: runtime.url,
+      headers: ('headers' in runtime && runtime.headers) || {}
+    };
+  } else if (runtime.type === 'docker' && 'image' in runtime) {
+    config = {
+      command: 'docker',
+      args: ['run', '-i', '--rm', runtime.image],
+      env: ('env' in runtime && runtime.env) || {}
+    };
+  } else if (runtime.type === 'pip' && 'package' in runtime) {
+    config = {
       command: 'python',
-      args: ['-m', latestVersion.runtime.module || latestVersion.runtime.package],
-      env: latestVersion.runtime.env || {}
-    }, null, 6).split('\n').join('\n    ')}
+      args: ['-m', ('module' in runtime && runtime.module) || runtime.package],
+      env: ('env' in runtime && runtime.env) || {}
+    };
+  } else if (hasCommand(runtime)) {
+    const cmd = runtime as { command: string; args?: string[]; env?: Record<string, string> };
+    config = {
+      command: cmd.command,
+      args: cmd.args || [],
+      env: cmd.env || {}
+    };
+  } else {
+    config = { command: '', args: [], env: {} };
   }
-}` : `{
+  return `{
   "mcpServers": {
-    "${server.slug}": ${JSON.stringify({
-      command: latestVersion.runtime.command || '',
-      args: latestVersion.runtime.args || [],
-      env: latestVersion.runtime.env || {}
-    }, null, 6).split('\n').join('\n    ')}
+    "${server.slug}": ${JSON.stringify(config, null, 6).split('\n').join('\n    ')}
   }
-}`}
+}`;
+})()}
               </pre>
             </div>
           </div>
