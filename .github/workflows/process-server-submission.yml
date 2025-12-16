@@ -195,14 +195,14 @@ jobs:
               ]
             };
             
-            // Add optional overrides
-            if (descriptionOverride) {
+            // Add optional overrides (ignore GitHub's "_No response_" placeholder)
+            if (descriptionOverride && descriptionOverride !== '_No response_') {
               serverJson.metadata.description = descriptionOverride;
             }
-            if (homepageOverride) {
+            if (homepageOverride && homepageOverride !== '_No response_') {
               serverJson.metadata.homepage = homepageOverride;
             }
-            if (sourceUrl) {
+            if (sourceUrl && sourceUrl !== '_No response_') {
               serverJson.metadata.sourceUrl = sourceUrl;
             }
             

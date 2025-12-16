@@ -366,8 +366,10 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
         }
       };
       
-      // Add environment variables if present
-      if (version.runtime.env) {
+      // Add environment variables from new structure or legacy env object
+      if (version.runtime.environmentVariables) {
+        pkg.environmentVariables = version.runtime.environmentVariables;
+      } else if (version.runtime.env) {
         pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
           name,
           description: `Environment variable ${name}`,
@@ -393,8 +395,10 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
           }
         };
         
-        // Add environment variables if present
-        if (version.runtime.env) {
+        // Add environment variables from new structure or legacy env object
+        if (version.runtime.environmentVariables) {
+          pkg.environmentVariables = version.runtime.environmentVariables;
+        } else if (version.runtime.env) {
           pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
             name,
             description: `Environment variable ${name}`,
@@ -419,7 +423,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
       // NPM packages
       const packageName = version.runtime.args.find(arg => !arg.startsWith('-')) || version.runtime.args[0];
       if (packageName && packageName.includes('/')) {
-        mcpSchema.packages = [{
+        const pkg: Package = {
           registryType: 'npm',
           registryBaseUrl: 'https://registry.npmjs.org',
           identifier: packageName,
@@ -427,7 +431,31 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
           transport: {
             type: 'stdio'
           }
-        }];
+        };
+        
+        // Add command-line arguments from additionalArgs structure
+        if (version.runtime.additionalArgs && version.runtime.additionalArgs.length > 0) {
+          pkg.arguments = version.runtime.additionalArgs.map(arg => ({
+            name: arg.value,
+            description: arg.description || arg.value,
+            isSecret: arg.isSecret || false,
+            format: 'string'
+          }));
+        }
+        
+        // Add environment variables from new structure or legacy env object
+        if (version.runtime.environmentVariables) {
+          pkg.environmentVariables = version.runtime.environmentVariables;
+        } else if (version.runtime.env) {
+          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+            name,
+            description: `Environment variable ${name}`,
+            format: 'string',
+            isSecret: name.toLowerCase().includes('token') || name.toLowerCase().includes('key') || name.toLowerCase().includes('password')
+          }));
+        }
+        
+        mcpSchema.packages = [pkg];
       }
     }
 
