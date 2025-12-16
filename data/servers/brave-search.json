@@ -34,7 +34,7 @@
           "@modelcontextprotocol/server-brave-search"
         ],
         "env": {
-          "BRAVE_API_KEY": "your_brave_api_key"
+          "BRAVE_API_KEY": "${input:brave_api_key}"
         },
         "requirements": {
           "node": ">=18.0.0"
