@@ -4,6 +4,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 A Model Context Protocol (MCP) server registry that provides both a web interface and an API compatible with the [official MCP registry specification](https://registry.modelcontextprotocol.io/docs).
 
+## Registering on GitHub
+
+When registering this MCP registry on GitHub use `BASE_URL/api` as the registry URL (e.g. `https://mcp-registry.example.com/api`). If you don't keep the `/api` suffix, GitHub will not be able to find the registry endpoints.
+
 ## Features
 
 - 🔍 **Web Interface** - Browse and search MCP servers through a user-friendly UI
