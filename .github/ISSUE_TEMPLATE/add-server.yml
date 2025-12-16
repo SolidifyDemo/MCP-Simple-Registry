@@ -73,14 +73,15 @@ body:
       label: Additional NPM Arguments (Optional)
       description: |
         For Node.js runtime - additional arguments to pass after the package name.
+        **Add as many arguments as you need**, one per line.
         Format: VALUE|description|secret (where secret is true/false)
-        Examples:
-        - myorg|Organization name|false
-        - myproject|Project identifier|false
-        - --token=TOKEN|Authentication token|true
+        
+        💡 **Tip:** Add multiple lines for multiple arguments!
       placeholder: |
         myorg|Organization name|false
         myproject|Project name|false
+        prod|Environment name|false
+        --verbose|Enable verbose logging|false
 
   - type: input
     id: docker-image
@@ -102,31 +103,32 @@ body:
       label: HTTP Headers (Optional)
       description: |
         For HTTP runtime - custom headers to send with requests.
+        **Add as many headers as you need**, one per line.
         Format: NAME|description|secret (where secret is true/false)
-        Examples:
-        - Authorization|Bearer token for authentication|true
-        - X-API-Version|API version to use|false
-        - X-Client-ID|Client identifier|false
+        
+        💡 **Tip:** Add multiple lines for multiple headers!
       placeholder: |
         Authorization|Bearer token for API authentication|true
         X-API-Version|API version (e.g., v2)|false
         X-Client-ID|Your client ID|false
+        X-Tenant-ID|Your tenant ID|false
+        X-Request-ID|Unique request identifier|false
 
   - type: textarea
     id: env-vars
     attributes:
       label: Environment Variables (Optional)
       description: |
-        Required environment variables, one per line.
+        Required environment variables - **add as many as you need**, one per line.
         Format: NAME|description|secret (where secret is true/false)
-        Examples:
-        - API_KEY|Your API key for authentication|true
-        - DATABASE_NAME|Name of the database to connect to|false
-        - REGION|AWS region|false
+        
+        💡 **Tip:** Add multiple lines for multiple variables!
       placeholder: |
-        API_KEY|API key for authentication|true
+        API_KEY|Your API key for authentication|true
         DATABASE_NAME|Database name|false
         GITHUB_TOKEN|GitHub personal access token|true
+        REGION|Deployment region|false
+        LOG_LEVEL|Logging verbosity level|false
 
   - type: textarea
     id: description-override

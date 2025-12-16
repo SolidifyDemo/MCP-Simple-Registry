@@ -50,6 +50,8 @@ Each line has three parts separated by pipes (`|`):
 2. **description**: Human-readable description
 3. **isSecret**: `true` for sensitive data, `false` for non-sensitive
 
+💡 **Pro Tip:** You can add **as many items as you need** - just add more lines in the textarea!
+
 ### Environment Variables
 
 **Format:** `NAME|description|secret`
@@ -60,6 +62,8 @@ API_KEY|Your API key for authentication|true
 GITHUB_TOKEN|GitHub personal access token|true
 DATABASE_NAME|Name of the database to connect to|false
 REGION|AWS region for deployment|false
+LOG_LEVEL|Logging verbosity level|false
+TIMEOUT|Request timeout in seconds|false
 ```
 
 This creates:
@@ -89,6 +93,9 @@ This creates:
 Authorization|Bearer token for authentication|true
 X-API-Version|API version to use|false
 X-Client-ID|Client identifier|false
+X-Tenant-ID|Tenant identifier|false
+X-Request-ID|Request tracking ID|false
+Content-Type|Request content type|false
 ```
 
 ### NPM Arguments
@@ -99,6 +106,9 @@ X-Client-ID|Client identifier|false
 ```
 myorg|Organization name|false
 myproject|Project identifier|false
+prod|Environment name|false
+--verbose|Enable verbose logging|false
+--config=/path|Configuration file path|false
 --token=TOKEN|Authentication token placeholder|true
 ```
 
