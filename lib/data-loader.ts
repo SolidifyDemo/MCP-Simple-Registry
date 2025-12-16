@@ -34,6 +34,15 @@ export async function loadServers(enrichFromRegistry: boolean = process.env.ENAB
       const fileContent = await fs.readFile(filePath, 'utf-8');
       const server = JSON.parse(fileContent);
       
+      // Ensure versions array exists, if not create a default entry
+      if (!server.versions || server.versions.length === 0) {
+        server.versions = [{
+          version: 'latest',
+          releaseDate: server.publishedAt || new Date().toISOString(),
+          runtime: server.runtime || { type: 'unknown' }
+        }];
+      }
+      
       // Enrich with live registry data if enabled
       if (enrichFromRegistry && server.versions?.length > 0) {
         try {
@@ -61,6 +70,10 @@ export async function loadServers(enrichFromRegistry: boolean = process.env.ENAB
           if (registryInfo.repository && !server.metadata.sourceUrl) {
             server.metadata.sourceUrl = registryInfo.repository;
           }
+          // Use GitHub owner avatar as logoUrl if not manually set
+          if (registryInfo.logoUrl && !server.metadata.logoUrl) {
+            server.metadata.logoUrl = registryInfo.logoUrl;
+          }
           
           // Update stats
           if (!server.stats) {
@@ -71,14 +84,6 @@ export async function loadServers(enrichFromRegistry: boolean = process.env.ENAB
           }
           if (registryInfo.stars !== undefined) {
             server.stats.stars = registryInfo.stars;
-          }
-          
-          // Fetch GitHub stars if we have a sourceUrl and no stars yet
-          if (server.metadata.sourceUrl && !server.stats.stars) {
-            const stars = await fetchGitHubStars(server.metadata.sourceUrl);
-            if (stars > 0) {
-              server.stats.stars = stars;
-            }
           }
           
           // Update the updatedAt timestamp
@@ -302,10 +307,16 @@ export async function getRegistryStats() {
 export function transformToMCPFormat(server: Server): MCPServerEntry[] {
   const entries: MCPServerEntry[] = [];
   
+  // If no versions exist, create a default version entry
+  if (!server.versions || server.versions.length === 0) {
+    console.warn(`Server ${server.id} has no versions, skipping transformation`);
+    return entries;
+  }
+  
   // Sort versions to determine the latest
   const sortedVersions = [...server.versions].sort((a, b) => {
-    const dateA = new Date(a.releaseDate).getTime();
-    const dateB = new Date(b.releaseDate).getTime();
+    const dateA = new Date(a.releaseDate || '1970-01-01').getTime();
+    const dateB = new Date(b.releaseDate || '1970-01-01').getTime();
     return dateB - dateA;
   });
 
@@ -317,12 +328,11 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
       $schema: 'https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json',
       name: `${server.vendorId}/${server.slug}`,
       description: server.metadata?.description || '',
-      version: version.version,
+      version: version.version || 'latest',
       repository: server.metadata?.sourceUrl ? {
         url: server.metadata.sourceUrl,
         source: 'github' // Default to github, can be inferred from URL
-      } : {},
-      _meta: {}
+      } : {}
     };
 
     // Add optional fields
@@ -346,6 +356,55 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
         type: 'streamable-http',
         url: version.runtime.url
       }];
+    } else if (version.runtime.type === 'docker' && 'image' in version.runtime) {
+      // Docker with explicit type and image field
+      const pkg: any = {
+        registryType: 'oci',
+        identifier: version.runtime.image,
+        transport: {
+          type: 'stdio'
+        }
+      };
+      
+      // Add environment variables if present
+      if (version.runtime.env) {
+        pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+          name,
+          description: `Environment variable ${name}`,
+          format: 'string',
+          isSecret: name.toLowerCase().includes('token') || name.toLowerCase().includes('key') || name.toLowerCase().includes('password')
+        }));
+      }
+      
+      mcpSchema.packages = [pkg];
+    } else if ('command' in version.runtime && version.runtime.command === 'docker' && version.runtime.args) {
+      // Docker using command format (e.g., docker run -i --rm ghcr.io/...)
+      // Extract the image name from args
+      const imageArg = version.runtime.args.find(arg => 
+        arg.includes('/') || arg.startsWith('ghcr.io') || arg.startsWith('docker.io')
+      );
+      
+      if (imageArg) {
+        const pkg: any = {
+          registryType: 'oci',
+          identifier: imageArg.startsWith('docker.io/') ? imageArg : `docker.io/${imageArg}`,
+          transport: {
+            type: 'stdio'
+          }
+        };
+        
+        // Add environment variables if present
+        if (version.runtime.env) {
+          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+            name,
+            description: `Environment variable ${name}`,
+            format: 'string',
+            isSecret: name.toLowerCase().includes('token') || name.toLowerCase().includes('key') || name.toLowerCase().includes('password')
+          }));
+        }
+        
+        mcpSchema.packages = [pkg];
+      }
     } else if (version.runtime.type === 'pip' && 'package' in version.runtime) {
       mcpSchema.packages = [{
         registryType: 'pypi',
@@ -356,9 +415,20 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
           type: 'stdio'
         }
       }];
-    } else if (version.runtime.type === 'node' || version.runtime.type === 'binary') {
-      // For node/binary, we could add packages if it's an npm package
-      // For now, leaving it without remotes/packages
+    } else if ((version.runtime.type === 'node' || version.runtime.command === 'npx') && version.runtime.args) {
+      // NPM packages
+      const packageName = version.runtime.args.find(arg => !arg.startsWith('-')) || version.runtime.args[0];
+      if (packageName && packageName.includes('/')) {
+        mcpSchema.packages = [{
+          registryType: 'npm',
+          registryBaseUrl: 'https://registry.npmjs.org',
+          identifier: packageName,
+          version: version.version,
+          transport: {
+            type: 'stdio'
+          }
+        }];
+      }
     }
 
     // Create the entry with metadata

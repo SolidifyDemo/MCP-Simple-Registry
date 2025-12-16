@@ -12,6 +12,16 @@ export interface RegistryPackageInfo {
   repository?: string;
   downloads?: number;
   stars?: number;
+  logoUrl?: string;
+}
+
+export interface RegistryRepoInfo {
+  description?: string;
+  homepage?: string;
+  stars?: number;
+  license?: string;
+  ownerAvatarUrl?: string;
+  updatedAt?: string;
 }
 
 export interface NpmPackageInfo extends RegistryPackageInfo {
@@ -225,18 +235,18 @@ export async function fetchDockerImage(imageName: string, sourceUrl?: string): P
 }
 
 /**
- * Fetch GitHub repository stars (for additional metrics)
+ * Fetch comprehensive GitHub repository information
  */
-export async function fetchGitHubStars(repoUrl: string): Promise<number> {
+export async function fetchGitHubRepoInfo(repoUrl: string): Promise<RegistryRepoInfo | null> {
   try {
     // Extract owner/repo from GitHub URL
     const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
     if (!match) {
-      return 0;
+      return null;
     }
 
     const [, owner, repo] = match;
-    const cleanRepo = repo.replace(/\.git$/, '');
+    const cleanRepo = repo.replace(/\.git$/, '').split('#')[0].split('?')[0];
 
     const response = await fetch(`https://api.github.com/repos/${owner}/${cleanRepo}`, {
       next: { revalidate: 3600 },
@@ -250,11 +260,32 @@ export async function fetchGitHubStars(repoUrl: string): Promise<number> {
     });
 
     if (!response.ok) {
-      return 0;
+      console.warn(`GitHub repo not found: ${repoUrl}`);
+      return null;
     }
 
     const data = await response.json();
-    return data.stargazers_count || 0;
+    return {
+      description: data.description || undefined,
+      homepage: data.homepage || undefined,
+      stars: data.stargazers_count || 0,
+      license: data.license?.spdx_id || undefined,
+      ownerAvatarUrl: data.owner?.avatar_url || undefined,
+      updatedAt: data.updated_at || undefined
+    };
+  } catch (error) {
+    console.error(`Error fetching GitHub repo info for ${repoUrl}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fetch GitHub repository stars (for additional metrics)
+ */
+export async function fetchGitHubStars(repoUrl: string): Promise<number> {
+  try {
+    const repoInfo = await fetchGitHubRepoInfo(repoUrl);
+    return repoInfo?.stars || 0;
   } catch (error) {
     console.error(`Error fetching GitHub stars for ${repoUrl}:`, error);
     return 0;
@@ -269,6 +300,8 @@ export async function getPackageInfo(runtime: { type?: string; command?: string;
     return {};
   }
 
+  let packageInfo: Partial<RegistryPackageInfo> = {};
+
   // NPM packages
   if ((runtime.type === 'node' || runtime.type === 'npx') && runtime.command === 'npx' && runtime.args && runtime.args.length > 0) {
     // Package name is typically at args[0] for npx, or args[1] if there are flags
@@ -276,7 +309,7 @@ export async function getPackageInfo(runtime: { type?: string; command?: string;
     const npmInfo = await fetchNpmPackage(packageName);
     if (npmInfo) {
       const downloads = await fetchNpmDownloads(packageName);
-      return {
+      packageInfo = {
         version: npmInfo.version,
         publishedAt: npmInfo.publishedAt,
         description: npmInfo.description,
@@ -292,7 +325,7 @@ export async function getPackageInfo(runtime: { type?: string; command?: string;
   if (runtime.type === 'docker' && runtime.image) {
     const dockerInfo = await fetchDockerImage(runtime.image, sourceUrl);
     if (dockerInfo) {
-      return {
+      packageInfo = {
         version: dockerInfo.version,
         publishedAt: dockerInfo.publishedAt,
         description: dockerInfo.description,
@@ -302,5 +335,30 @@ export async function getPackageInfo(runtime: { type?: string; command?: string;
     }
   }
 
-  return {};
+  // If sourceUrl is a GitHub repo, fetch additional info from GitHub
+  // This can provide description and owner avatar when package registry doesn't have it
+  if (sourceUrl && sourceUrl.includes('github.com')) {
+    const githubInfo = await fetchGitHubRepoInfo(sourceUrl);
+    if (githubInfo) {
+      // Only use GitHub data if not already set by package registry
+      if (!packageInfo.description && githubInfo.description) {
+        packageInfo.description = githubInfo.description;
+      }
+      if (!packageInfo.homepage && githubInfo.homepage) {
+        packageInfo.homepage = githubInfo.homepage;
+      }
+      if (!packageInfo.license && githubInfo.license) {
+        packageInfo.license = githubInfo.license;
+      }
+      if (!packageInfo.stars && githubInfo.stars) {
+        packageInfo.stars = githubInfo.stars;
+      }
+      // Add owner avatar as potential logo
+      if (githubInfo.ownerAvatarUrl) {
+        packageInfo.logoUrl = githubInfo.ownerAvatarUrl;
+      }
+    }
+  }
+
+  return packageInfo;
 }

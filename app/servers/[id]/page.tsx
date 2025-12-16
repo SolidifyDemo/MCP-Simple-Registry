@@ -169,7 +169,10 @@ export default async function ServerPage({
           {/* Runtime Type Badge */}
           <div className="mb-4">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-              {latestVersion.runtime.type.toUpperCase()} Runtime
+              {(latestVersion.runtime.type || 
+                (latestVersion.runtime.command === 'docker' ? 'DOCKER' : 
+                 latestVersion.runtime.command === 'npx' ? 'NPX' : 
+                 latestVersion.runtime.command?.toUpperCase() || 'UNKNOWN')).toUpperCase()} Runtime
             </span>
           </div>
 
@@ -177,9 +180,12 @@ export default async function ServerPage({
           <div className="bg-gray-900 dark:bg-black rounded-lg p-4 overflow-x-auto mb-4">
             <code className="text-sm text-green-400">
               {latestVersion.runtime.type === 'http' && latestVersion.runtime.url}
-              {latestVersion.runtime.type === 'docker' && `docker run ${latestVersion.runtime.image}`}
+              {(latestVersion.runtime.type === 'docker' || latestVersion.runtime.command === 'docker') && 
+                (latestVersion.runtime.image ? `docker run ${latestVersion.runtime.image}` : 
+                 latestVersion.runtime.args ? `docker ${latestVersion.runtime.args.join(' ')}` : 'docker run')}
               {latestVersion.runtime.type === 'pip' && `pip install ${latestVersion.runtime.package}`}
-              {(latestVersion.runtime.type === 'node' || latestVersion.runtime.type === 'python' || latestVersion.runtime.type === 'binary') && 
+              {(latestVersion.runtime.type === 'node' || latestVersion.runtime.type === 'python' || latestVersion.runtime.type === 'binary' ||
+                (latestVersion.runtime.command && !['docker', 'http'].includes(latestVersion.runtime.command))) && 
                 `${latestVersion.runtime.command} ${latestVersion.runtime.args?.join(' ') || ''}`}
             </code>
           </div>
@@ -200,30 +206,27 @@ export default async function ServerPage({
       headers: latestVersion.runtime.headers || {}
     }, null, 6).split('\n').join('\n    ')}
   }
-}` : latestVersion.runtime.type === 'docker' ? `{
+}` : (latestVersion.runtime.type === 'docker' || latestVersion.runtime.command === 'docker') ? `{
   "mcpServers": {
     "${server.slug}": ${JSON.stringify({
-      type: 'docker',
-      image: latestVersion.runtime.image,
-      ports: latestVersion.runtime.ports || {},
-      volumes: latestVersion.runtime.volumes || [],
+      command: latestVersion.runtime.command || 'docker',
+      args: latestVersion.runtime.args || [],
       env: latestVersion.runtime.env || {}
     }, null, 6).split('\n').join('\n    ')}
   }
 }` : latestVersion.runtime.type === 'pip' ? `{
   "mcpServers": {
     "${server.slug}": ${JSON.stringify({
-      type: 'pip',
-      package: latestVersion.runtime.package,
-      module: latestVersion.runtime.module,
+      command: 'python',
+      args: ['-m', latestVersion.runtime.module || latestVersion.runtime.package],
       env: latestVersion.runtime.env || {}
     }, null, 6).split('\n').join('\n    ')}
   }
 }` : `{
   "mcpServers": {
     "${server.slug}": ${JSON.stringify({
-      command: (latestVersion.runtime.type === 'node' || latestVersion.runtime.type === 'python' || latestVersion.runtime.type === 'binary') ? latestVersion.runtime.command : '',
-      args: (latestVersion.runtime.type === 'node' || latestVersion.runtime.type === 'python' || latestVersion.runtime.type === 'binary') ? latestVersion.runtime.args || [] : [],
+      command: latestVersion.runtime.command || '',
+      args: latestVersion.runtime.args || [],
       env: latestVersion.runtime.env || {}
     }, null, 6).split('\n').join('\n    ')}
   }

@@ -8,7 +8,8 @@ import {
   fetchNpmPackage, 
   fetchNpmDownloads,
   fetchDockerImage,
-  fetchGitHubStars 
+  fetchGitHubStars,
+  fetchGitHubRepoInfo 
 } from './lib/registry-fetcher.ts';
 
 console.log('🧪 Testing Registry Fetcher\n');
@@ -60,6 +61,23 @@ try {
   }
 } catch (error) {
   console.log('❌ GitHub fetch error:', error.message);
+}
+
+console.log('\n🔍 Testing GitHub repo info fetch...');
+try {
+  const repoInfo = await fetchGitHubRepoInfo('https://github.com/github/github-mcp-server');
+  if (repoInfo) {
+    console.log('✅ GitHub repo info fetch successful');
+    console.log(`   Description: ${repoInfo.description?.substring(0, 60)}...`);
+    console.log(`   Stars: ${repoInfo.stars?.toLocaleString()}`);
+    console.log(`   License: ${repoInfo.license || 'N/A'}`);
+    console.log(`   Homepage: ${repoInfo.homepage || 'N/A'}`);
+    console.log(`   Owner Avatar: ${repoInfo.ownerAvatarUrl?.substring(0, 50)}...`);
+  } else {
+    console.log('❌ GitHub repo info fetch failed');
+  }
+} catch (error) {
+  console.log('❌ GitHub repo info fetch error:', error.message);
 }
 
 console.log('\n✨ Test complete!');
