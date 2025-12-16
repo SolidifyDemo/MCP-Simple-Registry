@@ -281,6 +281,74 @@ curl http://localhost:3000/api/v0/servers/github?format=legacy
 
 ---
 
+### Get Latest Version of Server
+
+**GET** `/servers/{id}/versions/latest`
+
+Returns the latest version of a specific server. **Required by GitHub Copilot.**
+
+#### Parameters
+
+- `id` - The server ID (e.g., "github", "postgres")
+
+#### Response
+
+```json
+{
+  "servers": [
+    {
+      "server": {
+        "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+        "name": "modelcontextprotocol/github",
+        "version": "0.4.0",
+        "description": "Interact with GitHub repositories...",
+        "repository": {
+          "url": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+          "source": "github"
+        }
+      },
+      "_meta": {
+        "io.modelcontextprotocol.registry/official": {
+          "status": "active",
+          "isLatest": true
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "count": 1
+  }
+}
+```
+
+#### Examples
+
+```bash
+curl https://mcp-simple-registry.vercel.app/api/v0.1/servers/github/versions/latest
+curl https://mcp-simple-registry.vercel.app/api/v0.1/servers/postgres/versions/latest
+```
+
+---
+
+### Get Specific Version of Server
+
+**GET** `/servers/{id}/versions/{version}`
+
+Returns details for a specific version of a server. **Required by GitHub Copilot.**
+
+#### Parameters
+
+- `id` - The server ID (e.g., "github", "postgres")
+- `version` - The version string (e.g., "0.4.0")
+
+#### Examples
+
+```bash
+curl https://mcp-simple-registry.vercel.app/api/v0.1/servers/github/versions/0.4.0
+```
+
+---
+
 ## CORS Support
 
 All API endpoints include proper CORS headers for cross-origin requests:
