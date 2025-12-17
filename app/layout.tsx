@@ -27,6 +27,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* Fixed background with fade effect */}
+        <div className="fixed inset-0 -z-10 bg-gradient-to-b from-indigo-50 via-purple-50 to-blue-50 dark:from-gray-900 dark:via-purple-950 dark:to-gray-900" />
+        <div 
+          className="fixed inset-0 -z-10"
+          style={{
+            backgroundImage: 'url(/mcp-background.png)',
+            backgroundSize: '700px 700px',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            maskImage: 'radial-gradient(circle at center, black, transparent 350px)',
+          }}
+        />
         {children}
       </body>
     </html>

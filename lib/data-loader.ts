@@ -23,9 +23,9 @@ export async function loadServers(enrichFromRegistry: boolean = process.env.ENAB
   try {
     const serversDir = path.join(process.cwd(), 'data', 'servers');
     
-    // Read all JSON files from the servers directory
+    // Read all JSON files from the servers directory (excluding .schema.json)
     const files = await fs.readdir(serversDir);
-    const jsonFiles = files.filter(file => file.endsWith('.json'));
+    const jsonFiles = files.filter(file => file.endsWith('.json') && !file.endsWith('.schema.json'));
     
     // Load each server file
     const servers: Server[] = [];
