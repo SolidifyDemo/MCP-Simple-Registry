@@ -1,0 +1,37 @@
+{
+  "id": "azure",
+  "vendorId": "microsoft",
+  "slug": "azure",
+  "metadata": {
+    "name": "Azure MCP Server",
+    "tags": [
+      "azure",
+      "microsoft",
+      "npm",
+      "official"
+    ],
+    "homepage": "https://github.com/mcp/com.microsoft/azure",
+    "sourceUrl": "https://github.com/microsoft/mcp/tree/main/servers/Azure.Mcp.Server"
+  },
+  "versions": [
+    {
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@azure/mcp@latest",
+          "${input:_No response_}"
+        ],
+        "additionalArgs": [
+          {
+            "value": "_No response_",
+            "isSecret": false
+          }
+        ]
+      }
+    }
+  ],
+  "featured": true,
+  "verified": true
+}
