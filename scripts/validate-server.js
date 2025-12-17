@@ -5,8 +5,8 @@
  * Usage: node scripts/validate-server.js <path-to-json>
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 function validateServer(filePath) {
   console.log(`\n🔍 Validating: ${filePath}`);

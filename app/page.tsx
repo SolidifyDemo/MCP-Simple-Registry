@@ -3,31 +3,8 @@ import Link from 'next/link';
 import ServerCardInstallButton from './ServerCardInstallButton';
 import TagList from './TagList';
 
-// Generate consistent colors for tags
-function getTagColor(tag: string): string {
-  const colors = [
-    'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
-    'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200',
-    'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200',
-    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-200',
-    'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-200',
-    'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200',
-    'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200',
-    'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-200',
-    'bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-200',
-    'bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-200',
-  ];
-  
-  // Simple hash function for consistent colors
-  let hash = 0;
-  for (let i = 0; i < tag.length; i++) {
-    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
-}
-
 export default async function Home() {
-  const { servers, pagination } = await searchServers({
+  const { servers } = await searchServers({
     pageSize: 50,
     sortBy: 'updatedAt',
     sortOrder: 'desc'

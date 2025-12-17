@@ -2,9 +2,10 @@ import { getServerById } from '@/lib/data-loader';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import InstallButton from './InstallButton';
+import { RuntimeInfo } from '@/lib/types';
 
 // Type helper to check if runtime has a command property
-function hasCommand(runtime: any): runtime is { command: string; args?: string[]; env?: Record<string, string> } {
+function hasCommand(runtime: RuntimeInfo): runtime is Extract<RuntimeInfo, { command: string }> {
   return 'command' in runtime && typeof runtime.command === 'string';
 }
 
@@ -250,7 +251,7 @@ export default async function ServerPage({
             <div className="bg-white dark:bg-gray-950 rounded p-3 overflow-x-auto">
               <pre className="text-xs text-gray-800 dark:text-gray-200">
 {(() => {
-  let config: any;
+  let config: Record<string, unknown>;
   if (runtime.type === 'http' && 'url' in runtime) {
     config = {
       url: runtime.url,

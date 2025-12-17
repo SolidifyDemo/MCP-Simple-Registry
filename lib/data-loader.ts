@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Server, MCPServerEntry, MCPServerSchema, MCPServersResponse, Package } from './types';
-import { getPackageInfo, fetchGitHubStars } from './registry-fetcher';
+import { getPackageInfo } from './registry-fetcher';
 
 let cachedServers: Server[] | null = null;
 let lastCacheTime: number = 0;
@@ -370,7 +370,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
       if (version.runtime.environmentVariables) {
         pkg.environmentVariables = version.runtime.environmentVariables;
       } else if (version.runtime.env) {
-        pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+        pkg.environmentVariables = Object.entries(version.runtime.env).map(([name]) => ({
           name,
           description: `Environment variable ${name}`,
           format: 'string',
@@ -399,7 +399,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
         if (version.runtime.environmentVariables) {
           pkg.environmentVariables = version.runtime.environmentVariables;
         } else if (version.runtime.env) {
-          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name]) => ({
             name,
             description: `Environment variable ${name}`,
             format: 'string',
@@ -447,7 +447,7 @@ export function transformToMCPFormat(server: Server): MCPServerEntry[] {
         if (version.runtime.environmentVariables) {
           pkg.environmentVariables = version.runtime.environmentVariables;
         } else if (version.runtime.env) {
-          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name, value]) => ({
+          pkg.environmentVariables = Object.entries(version.runtime.env).map(([name]) => ({
             name,
             description: `Environment variable ${name}`,
             format: 'string',
