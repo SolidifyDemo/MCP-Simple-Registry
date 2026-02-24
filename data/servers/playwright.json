@@ -1,0 +1,34 @@
+{
+  "id": "playwright",
+  "vendorId": "microsoft",
+  "slug": "playwright",
+  "metadata": {
+    "name": "Playwright MCP Server",
+    "tags": [
+      "web",
+      "browser"
+    ],
+    "description": "The Playwright MCP server"
+  },
+  "versions": [
+    {
+      "runtime": {
+        "type": "node",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@playwright/mcp@latest",
+          "${input:_No response_}"
+        ],
+        "additionalArgs": [
+          {
+            "value": "_No response_",
+            "isSecret": false
+          }
+        ]
+      }
+    }
+  ],
+  "featured": true,
+  "verified": true
+}
